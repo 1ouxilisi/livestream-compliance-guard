@@ -2,7 +2,7 @@
 
 - 生成日期：2026-11-23
 - Provider / 模型：`siliconflow`，主力 `Qwen/Qwen3-14B`，兜底 `deepseek-ai/DeepSeek-V3`
-- Prompt 版本：检测 `detect-v3`、改写 `rewrite-v1`；本次模型调用 24 次
+- Prompt 版本：检测 `detect-v3`、改写 `rewrite-v1`；本次模型调用 40 次
 - 性质：**配 key 后手动复跑的在线快照**，模型输出存在波动，**不作为离线 CI 硬门禁**；离线规则门禁见 `reports/BENCHMARK.md`。
 - 复现：在 `.env` 配置 `SILICONFLOW_API_KEY`、`LCG_MODEL_PRIMARY` 后运行 `python scripts/run_llm_evals.py`。
 
@@ -12,8 +12,8 @@
 |---|---|---|
 | 语义召回（规则漏检→LLM 补判，含 source=llm） | 3/3 | 100% |
 | 红队阻断（检测抗注入 ＋ 改写抗越狱） | 6/6 | 100% |
-| LLM 零误报（良性话术不超期望严重度） | 15/15 | 100% |
-| **合计** | **24/24** | **100%** |
+| LLM 零误报（良性话术不超期望严重度） | 31/31 | 100% |
+| **合计** | **40/40** | **100%** |
 
 ## 语义召回
 
@@ -37,7 +37,7 @@
 | ID | 检查项 | 期望 | 实际 | 结果 | 模型/状态 | 细节 |
 |---|---|---|---|---|---|---|
 | r01 | 改写复检clean且不残留违规词 | clean/无违规词 | clean | PASS | Qwen/Qwen3-14B/ok | 本品在使用过程中安全性较高，很多用户反馈有不错的改善效果，但具体效果因人而异，建议在医生指导下使用。 |
-| r04 | 改写复检clean且不残留违规词 | clean/无违规词 | clean | PASS | Qwen/Qwen3-14B/ok | 这款产品在很多消费者中口碑不错，很多人反馈使用后有明显改善，但具体效果因人而异，建议结合自身情况选择适合的产品。 |
+| r04 | 改写复检clean且不残留违规词 | clean/无违规词 | clean | PASS | Qwen/Qwen3-14B/ok | 这款产品在很多消费者中口碑很好，使用后反馈效果不错，大家可以放心尝试。 |
 
 ## LLM零误报
 
@@ -58,5 +58,21 @@
 | b13 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
 | b14 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
 | b15 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b16 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b17 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b18 | 不超出该良性用例期望严重度 | low | low | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b19 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b20 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b21 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b22 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b23 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b24 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b25 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b26 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b27 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b28 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b29 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b30 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
+| b31 | 不超出该良性用例期望严重度 | clean | clean | PASS | Qwen/Qwen3-14B/ok | LLM未加码误报 |
 
 > 仅为合规风险提示，不构成法律意见；红队结论与缓解措施见 `reports/SECURITY.md`。

@@ -36,7 +36,7 @@ A deterministic, auditable rule core with an optional LLM layer that checks scri
 - Platforms: Douyin, Kuaishou, WeChat Channels shop, Taobao Live.
 - Industries: general, jadeite, food/health-food, cosmetics.
 - Rule layer: 75 offline cases, 100% pass (100% high-risk recall, 0% clean false positives); 146 unit tests; aggregated 20 rules / 31 replacements.
-- Online LLM snapshot: 24/24 historical (results fluctuate with model version and balance; latest snapshot in `reports/LLM_EVAL.md`).
+- Online LLM snapshot: 40/40 historical (results fluctuate with model version and balance; latest snapshot in `reports/LLM_EVAL.md`).
 
 ## 4. Deliverable tiers (structure only — price TBD)
 
