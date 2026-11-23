@@ -1,4 +1,4 @@
 ﻿ts,feedback,industry,platform,reported_risk,category,text,note
-2026-11-23T11:32:55.692116+00:00,false_positive,general,douyin,medium,化妆品-医疗作用宣称,这款精华帮助祛痘控油，温和不刺激。,合规妆效被误报，建议复核词库
-2026-11-23T11:32:55.693814+00:00,false_negative,general,douyin,clean,站外导流,想要资料的看我主页联系方式。,暗示导流，规则层未命中，待补语义探针
-2026-11-23T11:32:55.695420+00:00,review,general,douyin,low,绝对化用语,这款是我们店里卖得很好的一款。,存疑：销量描述是否构成夸大，待人工复核
+2026-11-23T15:15:22.906642+00:00,false_positive,general,douyin,medium,化妆品-医疗作用宣称,这款精华帮助祛痘控油，温和不刺激。,合规妆效被误报，建议复核词库
+2026-11-23T15:15:22.908343+00:00,false_negative,general,douyin,clean,站外导流,想要资料的看我主页联系方式。,暗示导流，规则层未命中，待补语义探针
+2026-11-23T15:15:22.909851+00:00,review,general,douyin,low,绝对化用语,这款是我们店里卖得很好的一款。,存疑：销量描述是否构成夸大，待人工复核

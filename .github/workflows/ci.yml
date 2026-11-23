@@ -47,12 +47,22 @@ jobs:
               "lcg/rules/rules.v1.json",
               "lcg/rules/plugins/food.json",
               "lcg/rules/plugins/cosmetics.json",
+              "lcg/identity.py",
+              "lcg/cache.py",
+              "lcg/tenant.py",
+              "lcg/audit.py",
+              "lcg/feedback.py",
+              "lcg/ledger.py",
+              "lcg/request_ctx.py",
+              "lcg/ingest.py",
+              "lcg/sources.py",
+              "lcg/aggregator.py",
           ]
           missing = [r for r in required if r not in names]
           if missing:
               print("MISSING in wheel:", missing)
               sys.exit(1)
-          print("wheel OK, rule lexicon bundled:", ", ".join(required))
+          print("wheel OK, lexicon + core modules bundled:", ", ".join(required))
           PY
 
       - name: Eval suite (regenerate BENCHMARK)
