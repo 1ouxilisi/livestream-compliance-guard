@@ -47,3 +47,21 @@ def test_load_source_empty():
 def test_protocol_runtime_checkable():
     assert isinstance(sources.StubSource(), sources.TranscriptSource)
     assert isinstance(sources.ListSource([]), sources.TranscriptSource)
+
+
+def test_stub_recognizer_normalizes_segments():
+    rec = sources.StubRecognizer([{"speaker": "A", "text": "识别出的一句"}, "另一句"])
+    out = rec.recognize(payload={"type": "audio"})
+    assert [r["text"] for r in out] == ["识别出的一句", "另一句"]
+    assert out[0]["speaker"] == "A"
+
+
+def test_stub_recognizer_accepts_any_payload_and_adds():
+    rec = sources.StubRecognizer()
+    rec.add({"speaker": "B", "text": "追加识别片段"})
+    out = rec.recognize(payload=b"\x00binary")
+    assert len(out) == 1 and out[0]["speaker"] == "B"
+
+
+def test_recognizer_protocol_runtime_checkable():
+    assert isinstance(sources.StubRecognizer(), sources.Recognizer)

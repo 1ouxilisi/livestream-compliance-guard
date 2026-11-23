@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "livestream-compliance-guard"
-version = "0.7.4"
+version = "0.7.5"
 description = "Real-time compliance guard MCP for China live commerce (Advertising Law + platform rules), jadeite-first, with a language-neutral rule core."
 keywords = ["mcp", "live-commerce", "compliance", "advertising-law", "banned-words", "content-moderation", "jadeite", "china"]
 readme = "README.md"

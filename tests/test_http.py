@@ -85,3 +85,42 @@ async def test_bearer_enforced():
                 assert len((await session.list_tools()).tools) == 6
     finally:
         await _stop(server, task)
+
+
+def test_parse_tokens_explicit_and_env(monkeypatch):
+    monkeypatch.delenv("LCG_BEARER_TOKEN", raising=False)
+    monkeypatch.delenv("LCG_BEARER_TOKENS", raising=False)
+    assert server_http._parse_tokens("a, b ,,c") == {"a", "b", "c"}
+    assert server_http._parse_tokens(["x", " y "]) == {"x", "y"}
+    monkeypatch.setenv("LCG_BEARER_TOKEN", "single")
+    monkeypatch.setenv("LCG_BEARER_TOKENS", "k1, k2")
+    assert server_http._parse_tokens(None) == {"single", "k1", "k2"}
+
+
+@pytest.mark.asyncio
+async def test_multi_key_bearer():
+    import httpx
+    from mcp import ClientSession
+    from mcp.client.streamable_http import streamable_http_client
+
+    server, task, port = await _serve(["key-a", "key-b"])
+    try:
+        async with httpx.AsyncClient() as client:
+            assert (await client.post(f"http://127.0.0.1:{port}/mcp")).status_code == 401
+            assert (await client.post(
+                f"http://127.0.0.1:{port}/mcp",
+                headers={"Authorization": "Bearer nope"})).status_code == 401
+
+        # 任一合法 Key 均可握手
+        auth_client = httpx.AsyncClient(
+            headers={"Authorization": "Bearer key-b"})
+        async with auth_client as http_client, \
+                streamable_http_client(
+                    f"http://127.0.0.1:{port}/mcp",
+                    http_client=http_client) as (rd, wr, _):
+            async with ClientSession(rd, wr) as session:
+                await session.initialize()
+                assert len((await session.list_tools()).tools) == 6
+    finally:
+        await _stop(server, task)
+

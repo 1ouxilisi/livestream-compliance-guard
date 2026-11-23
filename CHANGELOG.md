@@ -4,6 +4,23 @@
 
 规则库内容版本见 `rules/rules.v1.json` 的 `meta.version`（核心包当前 **v1.4**），与软件包版本相互独立；行业插件包在 `rules/plugins/*.json` 各自维护版本。
 
+## [0.7.5] - 2026-11-23
+
+平台化骨架补强：可选 SQLite 配额持久化、HTTP 多 Key 鉴权、ASR/OCR 识别适配器协议；运行时判定 API 与规则结论向后兼容，默认行为不变。
+
+### 新增
+- **SQLite 配额后端**：`lcg.tenant` 新增 `SQLiteQuotaStore`（标准库 sqlite3，零第三方依赖）与 `quota_store_from_env` 工厂；`LCG_STORE_DSN` 为空走进程内存，文件路径落盘持久化，`:memory:` 为内存库。配额口径与内存实现一致，用量可跨连接复用。
+- **HTTP 多 Key 鉴权**：`lcg.server_http` 支持 `LCG_BEARER_TOKENS`（逗号分隔多 Key），与单值 `LCG_BEARER_TOKEN` 合并生效；仍为静态共享凭证，不做账号 / 角色体系。
+- **识别适配器协议**：`lcg.sources` 新增 `Recognizer` 协议与 `StubRecognizer` 桩，把媒体负载适配为文本片段交 `ingest` 归一；不内置真实 ASR/OCR 模型、不发起网络请求，真实后端由部署方接入。
+
+### 变更
+- `UsageMeter.snapshot` 改为通用读取底层 store 的快照方法，不再限定内存实现。
+- 文档：`DEPLOYMENT.md` / `SCOPE_BOUNDARY.md` 同步现状基础与边界；审计 / 反馈仍为本地 JSONL，本轮未迁移关系库。
+- 回归：ruff 全仓通过、pytest **161 项**全绿、规则评测 **75/75**（高危检出 100%、干净误报 0%）；软件包版本升至 **0.7.5**（核心规则库 v1.4，行业插件 v1.0）。
+
+### 未实现（外部条件 / 产品边界）
+- 真实 ASR/OCR 服务接入、外置数据库 / 对象存储、账号注册登录与角色权限、生产部署与支付对接、强监管行业规则转实、资质真伪核验、法律意见判定，仍需外部凭证 / 法务复核 / 部署资源，见 `docs/DEPLOYMENT.md` 第 5、6 节。
+
 ## [0.7.4] - 2026-11-23
 
 规则层紧凑归一化补强：拦截斜杠 / 竖线 / 反斜杠分隔的阻断变体；判定 API 与规则结论向后兼容。

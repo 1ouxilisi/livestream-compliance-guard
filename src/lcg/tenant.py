@@ -14,6 +14,8 @@ lcg.tenant —— 租户配额与用量计量的**进程内骨架**（零第三�
 """
 from __future__ import annotations
 
+import os
+import sqlite3
 import threading
 from dataclasses import dataclass
 from typing import Dict, Optional, Protocol
@@ -102,6 +104,129 @@ class UsageMeter:
         return self.store.consume(tenant_id, calls=calls, tokens=tokens)
 
     def snapshot(self) -> Dict[str, Dict[str, int]]:
-        if isinstance(self.store, InMemoryQuotaStore):
-            return self.store.snapshot()
-        return {}
+        snap = getattr(self.store, "snapshot", None)
+        return snap() if callable(snap) else {}
+
+
+class SQLiteQuotaStore:
+    """基于 sqlite3 标准库的配额 / 用量持久化后端（可选，零第三方依赖）。
+
+    - ``dsn`` 为文件路径时用量落盘、重启不丢；传 ``:memory:`` 为进程内内存库。
+    - 仅为本机单进程持久化骨架：不做账号鉴权、不做跨进程 / 网络共享；生产多租户
+      仍需外置数据库、Key 签发与按租户隔离（见 ``docs/DEPLOYMENT.md``）。
+    """
+
+    def __init__(self, dsn: str = ":memory:") -> None:
+        self._lock = threading.Lock()
+        self._conn = sqlite3.connect(dsn, check_same_thread=False)
+        self._conn.row_factory = sqlite3.Row
+        self._init_schema()
+
+    def _init_schema(self) -> None:
+        with self._lock, self._conn:
+            self._conn.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS tenants (
+                    tenant_id    TEXT PRIMARY KEY,
+                    name         TEXT NOT NULL,
+                    plan         TEXT NOT NULL DEFAULT 'free',
+                    quota_calls  INTEGER NOT NULL DEFAULT 0,
+                    quota_tokens INTEGER NOT NULL DEFAULT 0,
+                    active       INTEGER NOT NULL DEFAULT 1
+                );
+                CREATE TABLE IF NOT EXISTS usage (
+                    tenant_id TEXT PRIMARY KEY,
+                    calls     INTEGER NOT NULL DEFAULT 0,
+                    tokens    INTEGER NOT NULL DEFAULT 0
+                );
+                """
+            )
+
+    def register(self, tenant: Tenant) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                "INSERT OR REPLACE INTO tenants "
+                "(tenant_id, name, plan, quota_calls, quota_tokens, active) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (tenant.id, tenant.name, tenant.plan, tenant.quota_calls,
+                 tenant.quota_tokens, 1 if tenant.active else 0),
+            )
+            self._conn.execute(
+                "INSERT OR IGNORE INTO usage (tenant_id, calls, tokens) "
+                "VALUES (?, 0, 0)", (tenant.id,),
+            )
+
+    def _row_to_tenant(self, row: sqlite3.Row) -> Tenant:
+        return Tenant(
+            id=row["tenant_id"],
+            name=row["name"],
+            plan=row["plan"],
+            quota_calls=row["quota_calls"],
+            quota_tokens=row["quota_tokens"],
+            active=bool(row["active"]),
+        )
+
+    def get(self, tenant_id: str) -> Optional[Tenant]:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM tenants WHERE tenant_id = ?", (tenant_id,)
+            ).fetchone()
+        return self._row_to_tenant(row) if row else None
+
+    def _usage_row(self, tenant_id: str) -> UsageRecord:
+        row = self._conn.execute(
+            "SELECT calls, tokens FROM usage WHERE tenant_id = ?", (tenant_id,)
+        ).fetchone()
+        if row is None:
+            return UsageRecord()
+        return UsageRecord(calls=row["calls"], tokens=row["tokens"])
+
+    def consume(self, tenant_id: str, calls: int = 0, tokens: int = 0) -> bool:
+        with self._lock, self._conn:
+            row = self._conn.execute(
+                "SELECT * FROM tenants WHERE tenant_id = ?", (tenant_id,)
+            ).fetchone()
+            if row is None or not row["active"]:
+                return False
+            tenant = self._row_to_tenant(row)
+            usage = self._usage_row(tenant_id)
+            if tenant.quota_calls > 0 and usage.calls + calls > tenant.quota_calls:
+                return False
+            if tenant.quota_tokens > 0 and usage.tokens + tokens > tenant.quota_tokens:
+                return False
+            self._conn.execute(
+                "INSERT INTO usage (tenant_id, calls, tokens) VALUES (?, ?, ?) "
+                "ON CONFLICT(tenant_id) DO UPDATE SET "
+                "calls = calls + excluded.calls, tokens = tokens + excluded.tokens",
+                (tenant_id, calls, tokens),
+            )
+            return True
+
+    def usage(self, tenant_id: str) -> UsageRecord:
+        with self._lock:
+            return self._usage_row(tenant_id)
+
+    def snapshot(self) -> Dict[str, Dict[str, int]]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT tenant_id, calls, tokens FROM usage"
+            ).fetchall()
+        return {r["tenant_id"]: {"calls": r["calls"], "tokens": r["tokens"]}
+                for r in rows}
+
+    def close(self) -> None:
+        with self._lock:
+            self._conn.close()
+
+
+def quota_store_from_env(dsn: Optional[str] = None) -> QuotaStore:
+    """按环境变量 ``LCG_STORE_DSN`` 选择配额存储；未配置时返回进程内存实现。
+
+    - 未配置 / 空：``InMemoryQuotaStore``（默认，重启清空）；
+    - 文件路径：``SQLiteQuotaStore`` 落盘持久化；
+    - ``:memory:``：SQLite 内存库（进程内，不落文件）。
+    """
+    raw = (dsn or os.environ.get("LCG_STORE_DSN") or "").strip()
+    if not raw:
+        return InMemoryQuotaStore()
+    return SQLiteQuotaStore(raw)
