@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  rules-and-evals:
+    name: Rules sync · baseline · pytest · evals
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 规则核心零第三方依赖即可验证；无需 pip install，CI 秒级完成
+      - name: Rules JSON in sync with source
+        run: python scripts/export_rules.py --check
+
+      - name: Baseline behavior tests
+        run: python tests/run_baseline.py
+
+      # 单元测试需要 mcp（覆盖 server_stdio）与 pytest
+      - name: Install dev dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: pytest unit tests
+        run: python -m pytest -q
+
+      - name: Eval suite (regenerate BENCHMARK)
+        run: python evals/run_evals.py
+
+      # 评测会刷新 reports/BENCHMARK.md；若有变化则提交回仓库，保持报告与代码同步
+      - name: Commit refreshed BENCHMARK
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/BENCHMARK.md
+          git diff --staged --quiet || git commit -m "chore(benchmark): refresh BENCHMARK.md [skip ci]"

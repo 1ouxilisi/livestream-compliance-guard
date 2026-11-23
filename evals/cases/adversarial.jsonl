@@ -1,0 +1,30 @@
+{"id":"a01","industry":"jadeite","platform":"douyin","expect_risk":"high","expect_any":["100%","保真","养生","辟邪","收藏必涨","加微信"],"text":"家人们这块玻璃种帝王绿，100%保真，戴了能养生辟邪，收藏必涨，加微信私下交易，今天最后一天！","note":"多重高危叠加"}
+{"id":"a02","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["国家级","销量第一","百分百"],"text":"全网最低价，国家级玉雕大师作品，销量第一，百分百纯天然，今天不买就亏了！","note":"绝对化用语+虚构紧迫感"}
+{"id":"a03","industry":"jadeite","platform":"douyin","expect_risk":"high","expect_any":["辟邪","养生","治病","招财"],"text":"戴这个玉镯能辟邪招财，还能养生治病，戴了对身体好。","note":"迷信伪科学+医疗功效"}
+{"id":"a04","industry":"general","platform":"taobao","expect_risk":"high","expect_any":["稳赚不赔","保值","升值","错过再无"],"text":"这个料子买了稳赚不赔，保值升值空间巨大，错过再无！","note":"投资收益承诺+误导"}
+{"id":"a05","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["vx"],"text":"想要优惠加我微信 vx:abc12345，私下转账给你打折。","note":"变体联系方式站外导流"}
+{"id":"a06","industry":"jadeite","platform":"douyin","expect_risk":"high","expect_any":["之王"],"text":"这是我们家的性价比之王，满绿玻璃种，收藏级帝王绿，完美无瑕！","note":"绝对化+翡翠夸饰品相"}
+{"id":"a07","industry":"jadeite","platform":"douyin","expect_risk":"medium","text":"这款手镯颜色很漂亮，种水不错，属于玻璃种，性价比很高。","note":"翡翠品级噱头，中风险"}
+{"id":"a08","industry":"general","platform":"douyin","expect_risk":"low","text":"家人们宝宝们看过来，这款宝贝亏本冲量白送啦！","note":"诱导性叫卖，低风险提示"}
+{"id":"a09","industry":"general","platform":"douyin","expect_risk":"high","text":"想要优惠的加 ｖｘ：ａｂｃ１２３４５ 咨询。","note":"全角字母数字冒号变体站外导流；归一化前漏报，等长归一化后命中导流正则判high（无中文高危词，专测归一化）"}
+{"id":"a10","industry":"general","platform":"douyin","expect_risk":"high","text":"这款吊坠含金量１００％，其余为合金。","note":"全角数字百分号变体；归一化前漏报，等长归一化后命中100%绝对化判high"}
+{"id":"a11","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["第一"],"text":"我们的技术行业第一，服务全国第一，品质第一名。","note":"排名/榜首用法的“第一”必须仍判 high，序数消歧不得放过；第一名亦同"}
+{"id":"a12","industry":"general","platform":"douyin","expect_risk":"high","text":"这是最 好 的一款，没有之一。","note":"插空格拆分“最好”，等长层漏报，紧凑归一化剔除空格后规则层判 high"}
+{"id":"a13","industry":"general","platform":"douyin","expect_risk":"high","text":"我们家这款是业内 NO·1 的存在","note":"间隔号变体 NO·1，紧凑层剔除中点后命中绝对化符号判 high"}
+{"id":"a14","industry":"general","platform":"douyin","expect_risk":"high","text":"想领资料的宝子，看我主页 微❤️ abc12345 哈","note":"emoji+空格阻断“微”与号码，紧凑层剔除后命中严格导流正则判 high"}
+{"id":"a15","industry":"food","platform":"douyin","expect_risk":"high","text":"坚持喝三个月，高血压都降了，糖尿病也稳了，比吃药还管用！","note":"食品宣称降血压/稳糖尿病/比药管用，违反广告法17条与食品安全法73条，食品包判 high"}
+{"id":"a16","industry":"food","platform":"douyin","expect_risk":"high","text":"这个偏方食品包治百病，消炎止咳，吃了就能根治老胃病，无效退款！","note":"普通食品包治百病/根治胃病，疾病治疗宣称+核心消炎/根治/无效退款，判 high"}
+{"id":"a17","industry":"food","platform":"douyin","expect_risk":"high","text":"医生都在推荐的保健品，患者反馈吃了肿瘤小了，安全无毒副作用，可以替代药物！","note":"保健食品医生患者代言+肿瘤疗效+无毒副作用+替代药物，违反广告法18条，判 high"}
+{"id":"a18","industry":"food","platform":"douyin","expect_risk":"high","text":"纯天然提取物，没有任何副作用，100%安全，老人小孩必须天天吃，不吃身体就垮了。","note":"安全性断言+绝对化+健康恐惧，食品包与核心规则判 high"}
+{"id":"a19","industry":"cosmetics","platform":"douyin","expect_risk":"high","text":"这款药妆面霜消炎抗敏，专治湿疹皮炎，七天根治痘痘，比皮肤科药膏还管用！","note":"药妆/抗敏/湿疹皮炎/根治痘痘均为医疗作用宣称，违反化妆品条例43条，判 high"}
+{"id":"a20","industry":"cosmetics","platform":"douyin","expect_risk":"high","text":"医学护肤精华，纯天然无副作用，一次祛斑永不反弹，3天美白两个度，无效退款！","note":"医学护肤+安全断言+速效（一次/3天/永不反弹），违反广告审查标准100条，判 high"}
+{"id":"a21","industry":"cosmetics","platform":"douyin","expect_risk":"high","text":"医用级面膜，临床治愈激素脸，修复红血丝和疤痕，用了立刻见效，100%不过敏。","note":"医用级/临床治愈/修复疤痕红血丝/立刻见效/100%不过敏，医疗作用+速效断言，判 high"}
+{"id":"a22","industry":"cosmetics","platform":"douyin","expect_risk":"medium","text":"我们这款精华吊打同类大牌，销量冠军，秒杀某小黑瓶，效果甩它们几条街。","note":"贬低同类+无依据销量排名，化妆品包判 medium（无 high 词时不得升到 high）"}
+{"id":"a23","industry":"general","platform":"taobao","expect_risk":"high","expect_any":["扫码","进群","私下转账"],"text":"扫码进群领券，私下转账给你更便宜","note":"站外导流：扫码/进群/私下转账变体"}
+{"id":"a24","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["原价","仅此一次","错过再无"],"text":"原价999现价99，仅此一次，错过再无","note":"虚构原价+紧迫感误导"}
+{"id":"a25","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["顶级","唯一","史无前例"],"text":"业内顶级工艺，唯一选用进口材质，史无前例的性价比","note":"多绝对化用语叠加"}
+{"id":"a26","industry":"jadeite","platform":"douyin","expect_risk":"high","expect_any":["捡漏","保值","增值","传家之宝"],"text":"这块翡翠捡漏价入手，保值增值，传家之宝，稳涨","note":"翡翠投资升值+传家宝诱导"}
+{"id":"a27","industry":"food","platform":"douyin","expect_risk":"high","expect_any":["排毒","减肥","瘦身","降压"],"text":"每天一杯排毒养颜，减肥瘦身，通便降压","note":"普通食品多项疾病/功效宣称"}
+{"id":"a28","industry":"cosmetics","platform":"douyin","expect_risk":"high","expect_any":["消炎"],"text":"这款精华消炎祛痘，药用成分，七天淡斑","note":"化妆品消炎/药用医疗作用宣称"}
+{"id":"a29","industry":"general","platform":"kuaishou","expect_risk":"high","text":"想要的加薇信 qq8899123 私下发货","note":"薇信+号码变体站外导流，正则命中"}
+{"id":"a30","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["开光","招财","转运"],"text":"开光加持，招财转运，磁场能量超强","note":"迷信伪科学功效叠加"}

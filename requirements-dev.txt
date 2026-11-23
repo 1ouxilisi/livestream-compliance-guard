@@ -1,0 +1,6 @@
+# 开发与 CI：规则核心 + MCP 传输层（含 Streamable HTTP）+ 异步测试/静态检查
+-r requirements.txt
+pytest>=8.0
+pytest-asyncio>=0.24
+uvicorn>=0.30
+ruff>=0.6

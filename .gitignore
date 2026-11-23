@@ -1,0 +1,46 @@
+# ===== 密钥 / 环境变量（绝不入库）=====
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# ===== Node（TS/Cloudflare 路线，P1）=====
+node_modules/
+
+# ===== 数据飞轮本地缓存 / 日志 =====
+.data/
+*.log
+
+# ===== 操作系统 / 编辑器 =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# 说明：reports/BENCHMARK.md 与 reports/SECURITY.md 是对外信任凭证，需要提交，不在此忽略。
+
+# ===== 内部规划 / 上架台账（私有备查，不入库、不公开）=====
+*上架物料包*.md
+*环境说明*.md
+SETUP_开工步骤.md
+docs/GAP_BACKLOG_*.md
+
+# ===== 内部定价 / 商业验证 / 线索台账（私有备查，不入库、不公开）=====
+docs/PRICING.md
+docs/GO_TO_MARKET.md
+docs/lead-tracker.csv
+private/
+docs/UPGRADE_SUMMARY.md

@@ -1,0 +1,16 @@
+{
+  "name": "livestream-compliance-guard-devtools",
+  "private": true,
+  "version": "0.7.0",
+  "description": "Node dev toolchain for the Python MCP: MCP Inspector (local debugging) + promptfoo (LLM red team). The runtime rule core is Python and zero-dependency.",
+  "scripts": {
+    "inspect": "mcp-inspector python server.py",
+    "redteam": "promptfoo eval -c evals/promptfooconfig.yaml",
+    "redteam:view": "promptfoo view",
+    "redteam:init:win": "promptfoo init"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "2.9.0",
+    "promptfoo": "0.123.1"
+  }
+}

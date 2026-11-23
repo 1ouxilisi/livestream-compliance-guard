@@ -1,0 +1,21 @@
+{"id":"b01","industry":"general","platform":"taobao","expect_risk":"clean","text":"本品采用优质不锈钢工艺，做工精细，支持七天无理由退货。","note":"普通工业品客观描述，应放行"}
+{"id":"b02","industry":"jadeite","platform":"douyin","expect_risk":"low","text":"这是天然翡翠A货吊坠，配有鉴定证书，支持复检，喜欢可在直播间下单。","note":"合规话术，A货术语仅low提示"}
+{"id":"b03","industry":"general","platform":"taobao","expect_risk":"clean","text":"纯棉T恤，有黑白两色，尺码齐全，下单后48小时内发货。","note":"普通服装描述，应放行"}
+{"id":"b04","industry":"jadeite","platform":"kuaishou","expect_risk":"low","text":"这款是冰种手镯，肉质细腻，附带国检证书，支持复检，以实物为准。","note":"冰种术语low提示，整体合规"}
+{"id":"b05","industry":"general","platform":"douyin","expect_risk":"clean","text":"您好，商品有任何问题可以在订单页申请售后，我们会尽快处理。","note":"正常客服话术，应放行"}
+{"id":"b06","industry":"general","platform":"taobao","expect_risk":"clean","text":"这是本店第一款上架的保温杯，使用前第一步先清洗内胆，第一遍用温水冲洗即可。","note":"“第一款/第一步/第一遍”是次序不是排名，序数消歧后应放行"}
+{"id":"b07","industry":"jadeite","platform":"douyin","expect_risk":"low","text":"这是我们店第一期上新，第一件是冰种福瓜吊坠，配证书支持复检。","note":"“第一期/第一件”序数消歧，仅冰种术语 low 提示，不应判绝对化 high"}
+{"id":"b08","industry":"food","platform":"douyin","expect_risk":"clean","text":"这款每日坚果配料干净，口感酥脆，新鲜日期发货，独立小包装方便携带。","note":"普通食品客观口感描述，“配料干净”非医疗，应放行"}
+{"id":"b09","industry":"food","platform":"douyin","expect_risk":"clean","text":"蓝帽认证保健食品，保健功能为增强免疫力，每日两粒温水送服，本品不能代替药物。","note":"合规保健功能（备案目录内）+法定声明“不能代替药物”，必须放行"}
+{"id":"b10","industry":"food","platform":"douyin","expect_risk":"clean","text":"农家土蜂蜜，冲水香甜，产地直发，拌饭抹面包都合适。","note":"普通食品产地/口感描述，应放行"}
+{"id":"b11","industry":"food","platform":"douyin","expect_risk":"clean","text":"这款酸奶生牛乳发酵，酸甜适中，冷藏口感更好，饭后喝一杯很解腻。","note":"普通食品饮用场景，“解腻”非医疗功效，应放行"}
+{"id":"b12","industry":"cosmetics","platform":"douyin","expect_risk":"clean","text":"这款面霜主打玻尿酸保湿补水，质地清爽不黏腻，干皮上脸很滋润。","note":"保湿/补水/滋润为普通化妆品合规功效，应放行"}
+{"id":"b13","industry":"cosmetics","platform":"douyin","expect_risk":"clean","text":"防晒霜SPF50+，持有美白防晒双特证，出门前15分钟涂抹，补涂更安心。","note":"美白/防晒为需注册的特殊化妆品合规功效，持特证宣称应放行"}
+{"id":"b14","industry":"cosmetics","platform":"douyin","expect_risk":"clean","text":"氨基酸洁面温和清洁，泡沫绵密，洗完不紧绷，适合敏感肌日常清洁。","note":"“敏感肌/温和清洁”为合规肤质与功效描述，不等同“抗敏”医疗宣称，应放行"}
+{"id":"b15","industry":"cosmetics","platform":"douyin","expect_risk":"clean","text":"这款精华含烟酰胺，长期使用帮助提亮肤色，让妆容更服帖。","note":"提亮肤色为合规妆效，非医疗作用，应放行"}
+{"id":"b16","industry":"general","platform":"taobao","expect_risk":"clean","text":"这款电水壶容量1.5升，304不锈钢内胆，自动断电，一年质保","note":"普通家电客观参数，应放行"}
+{"id":"b17","industry":"general","platform":"douyin","expect_risk":"clean","text":"棉质衬衫，有蓝色和灰色，版型宽松，机洗不变形","note":"普通服装客观描述，应放行"}
+{"id":"b18","industry":"jadeite","platform":"shipinhao","expect_risk":"low","text":"冰种飘花手镯，附国检证书，支持复检，图片为自然光拍摄，以实物为准","note":"冰种术语low提示，带证书复检合规"}
+{"id":"b19","industry":"food","platform":"taobao","expect_risk":"clean","text":"这款燕麦片燕麦含量高，开水冲泡即食，早餐搭配牛奶口感更佳","note":"普通食品食用场景，应放行"}
+{"id":"b20","industry":"cosmetics","platform":"kuaishou","expect_risk":"clean","text":"这款唇釉显色度高，雾面质地，日常提气色，卸妆后不残留","note":"普通妆效描述，应放行"}
+{"id":"b21","industry":"general","platform":"douyin","expect_risk":"clean","text":"订单已发出，快递单号可在订单详情查看，有问题联系在线客服","note":"正常客服售后话术，应放行"}

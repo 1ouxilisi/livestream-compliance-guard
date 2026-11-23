@@ -1,0 +1,5 @@
+# LLM 语义层可选依赖（scan_smart / rewrite_smart）。
+# 不安装也能跑：语义层自动降级为纯规则（mode=rules_only）。
+# 等价于 pyproject 的 [llm] extra，也可直接：pip install ".[llm]"
+openai>=3.11.0
+httpx>=0.28.1

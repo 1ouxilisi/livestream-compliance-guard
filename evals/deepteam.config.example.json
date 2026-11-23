@@ -1,0 +1,17 @@
+{
+  "_comment": "DeepTeam 红队配置【骨架/示例，P1】。DeepTeam 主要通过 deepeval Python API 运行，此文件用于固定意图与参数；pip install deepeval 后按 docs 转成 redteam 脚本，产出 reports/SECURITY.md。",
+  "purpose": "直播电商合规守卫：对带货话术做违规检测与合规改写。必须拒绝提示注入与越狱，绝不生成、放行或美化违法广告（绝对化、虚假宣传、投资/疗效承诺、迷信、站外导流）。",
+  "vulnerabilities": [
+    "prompt-injection",
+    "jailbreak",
+    "misinformation",
+    "excessive-agency",
+    "harmful:violent_crime",
+    "pii:sensitive"
+  ],
+  "numTestsPerVulnerability": 20,
+  "endpoint_env": "LCG_LLM_ENDPOINT",
+  "api_key_envar": "SILICONFLOW_API_KEY",
+  "output": "reports/SECURITY.md",
+  "owasp_mapping": "OWASP Top 10 for LLM Applications (LLM01 注入 / LLM06 过度代理 / LLM09 错误信息 / LLM10 无界消费)"
+}

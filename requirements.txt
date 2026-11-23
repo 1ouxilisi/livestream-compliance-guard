@@ -1,0 +1,4 @@
+# 作为 MCP Server 运行 / 用 MCP Inspector 调试时需要（规则核心 src/lcg 本身零依赖）
+# 钉到本机已验证可运行的 1.x 线（2026-10，Python 3.14 / mcp 1.27.2）；
+# 上限 <2：mcp 2.x 将 FastMCP 改名为 MCPServer 并调整了客户端 API，本项目尚未迁移。
+mcp>=1.27.2,<2

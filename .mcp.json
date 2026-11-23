@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "livestream-compliance-guard": {
+      "command": "python",
+      "args": ["server.py"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "LCG_LLM_ENABLED": "0"
+      }
+    }
+  }
+}

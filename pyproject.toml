@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "livestream-compliance-guard"
+version = "0.7.0"
+description = "Real-time compliance guard MCP for China live commerce (Advertising Law + platform rules), jadeite-first, with a language-neutral rule core."
+keywords = ["mcp", "live-commerce", "compliance", "advertising-law", "banned-words", "content-moderation", "jadeite", "china"]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+# 版权署名与 LICENSE 版权行一致（GitHub: 1ouxilisi）
+authors = [{ name = "1ouxilisi" }]
+# 规则核心（src/lcg 的 models/rules_store/engine）零第三方依赖；
+# MCP 传输层与 LLM 增强层通过 optional-dependencies / requirements.txt 安装。
+dependencies = []
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.27.2,<2"]
+http = ["mcp>=1.27.2,<2", "uvicorn>=0.30"]
+llm = ["openai>=3.11.0", "httpx>=0.28.1"]
+dev = ["ruff>=0.6", "pytest>=8.0", "pytest-asyncio>=0.24", "mcp>=1.27.2,<2", "uvicorn>=0.30"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lcg"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# llm.py 的 DETECT/REWRITE 系统提示词为整段中文文案，保持不折行以免改变提示词语义
+"src/lcg/llm.py" = ["E501"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"

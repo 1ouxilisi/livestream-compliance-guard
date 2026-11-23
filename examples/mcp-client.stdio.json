@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "livestream-compliance-guard": {
+      "command": "python",
+      "args": ["/path/to/livestream-compliance-guard/server.py"],
+      "env": {}
+    }
+  }
+}
