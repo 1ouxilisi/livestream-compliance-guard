@@ -4,7 +4,7 @@
 
 | 文件 | 由谁生成 | 状态 |
 |---|---|---|
-| `BENCHMARK.md` | `python evals/run_evals.py`（离线、CI 自动刷新并提交） | ✅ 72 条 100% |
+| `BENCHMARK.md` | `python evals/run_evals.py`（离线、CI 自动刷新并提交） | ✅ 75 条 100% |
 | `LLM_EVAL.md` | `python scripts/run_llm_evals.py`（配 key 在线复跑，非 CI 门禁） | ✅ 24/24 |
 | `PERF.md` | `python scripts/bench_perf.py`（规则层延迟/吞吐 + LLM 抽样；本机测量，仅供相对比较） | ✅ 已生成 |
 | `SECURITY.md` | LLM 层红队评测报告（随 `run_llm_evals.py` 结果更新缓解说明） | ✅ 已生成 |

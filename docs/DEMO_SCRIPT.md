@@ -77,9 +77,9 @@ python scripts/demo_walkthrough.py
 
 ### 镜头 8 · 性能与测试基线（3:40–4:00）
 - **命令**：演示脚本第 8 节性能快照；再依次跑 `python evals/run_evals.py` 与 `python -m pytest -q`。
-- **预期画面**：规则层本机约 1.9ms/句、P95 约 2.5ms、数百句/秒；规则评测 72/72；单测 140 项通过。
-- **口播（中）**：规则层是零第三方依赖的纯本地判断，本机单句约两毫秒；离线评测 72 条全绿、高危检出 100%、干净误报 0%，单元测试 140 项通过。
-- **EN**：The rule core runs locally with zero third-party dependencies, about two milliseconds per sentence on this machine. Offline evals pass 72/72 with 100% high-risk recall and zero clean false positives; 140 unit tests pass.
+- **预期画面**：规则层本机约 1.9ms/句、P95 约 2.5ms、数百句/秒；规则评测 75/75；单测 146 项通过。
+- **口播（中）**：规则层是零第三方依赖的纯本地判断，本机单句约两毫秒；离线评测 75 条全绿、高危检出 100%、干净误报 0%，单元测试 146 项通过。
+- **EN**：The rule core runs locally with zero third-party dependencies, about two milliseconds per sentence on this machine. Offline evals pass 75/75 with 100% high-risk recall and zero clean false positives; 146 unit tests pass.
 
 ### 镜头 9 · 批量聚合与反馈闭环（4:00–4:15，离线）
 - **命令**：演示脚本第 9 节（批量聚合 · 输入适配 · 反馈闭环 · 审计事件）；反馈写临时 JSONL、审计仅构造样例，不落业务文件。

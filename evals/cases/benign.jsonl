@@ -28,3 +28,4 @@
 {"id":"b28","industry":"cosmetics","platform":"douyin","expect_risk":"clean","text":"这款面膜纸布轻薄，精华液滋润，敷完感觉肌肤水润清爽。","note":"普通肤感描述，无医疗/速效宣称，应放行"}
 {"id":"b29","industry":"cosmetics","platform":"kuaishou","expect_risk":"clean","text":"洗发水添加控油成分，洗后头皮清爽，发丝柔顺，适合油性发质。","note":"控油/柔顺为合规普通护发功效，应放行"}
 {"id":"b30","industry":"jadeite","platform":"douyin","expect_risk":"clean","text":"这只手镯圈口56，质地细腻，配鉴定证书，支持全国复检，实拍无美颜。","note":"无种水品级词，仅圈口/证书/复检等客观信息，应放行"}
+{"id":"b31","industry":"general","platform":"taobao","expect_risk":"clean","text":"男/女尺码齐全，大/小码都有货，按需拍下即可。","note":"斜杠为并列分隔而非词内阻断，剥离后不得拼成违规词，应放行"}

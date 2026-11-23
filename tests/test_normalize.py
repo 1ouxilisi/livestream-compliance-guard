@@ -97,3 +97,43 @@ def test_compact_hit_rewrite_closed_loop():
     r = engine.suggest_rewrite("这是最 好 的一款。", "general", "douyin")
     assert r["rewritten_clean"] is True
     assert "最 好" not in r["rewritten"]
+
+
+# ---------- 紧凑层：斜杠 / 竖线 / 反斜杠分隔阻断 ----------
+def test_compact_drops_slash_pipe_backslash():
+    c, idx = normalize_compact("最/好|x\\y")
+    assert c == "最好xy"
+    assert idx == [0, 2, 4, 6]
+
+
+def test_slash_split_superlative_high():
+    r = engine.detect("这是最/好的一款，没有之一。", "general", "douyin")
+    assert r["risk_level"] == "high"
+    assert any(x["category"] == "绝对化用语" for x in r["hits"])
+
+
+def test_pipe_backslash_split_superlative_high():
+    r1 = engine.detect("这款是最|好的料子。", "general", "douyin")
+    assert r1["risk_level"] == "high"
+    r2 = engine.detect("这款是最\\好的料子。", "general", "douyin")
+    assert r2["risk_level"] == "high"
+
+
+def test_divert_slash_contact_high():
+    r = engine.detect("想要优惠加 v/x：abc12345 私下聊。", "general", "douyin")
+    assert r["risk_level"] == "high"
+    assert any("导流" in x["category"] for x in r["hits"])
+
+
+# ---------- 防误报：句子边界标点不跨并；良性并列斜杠放行 ----------
+def test_halfwidth_punctuation_not_merged():
+    for t in ["最,好", "最!好", "最?好", "最(好)"]:
+        r = engine.detect(t, "general", "douyin")
+        assert r["risk_level"] == "clean", t
+        assert not any(x["category"] in ("绝对化用语", "泛化最高级") for x in r["hits"])
+
+
+def test_benign_slash_coordinate_clean():
+    r = engine.detect("男/女尺码齐全，大/小码都有货，按需拍下。", "general", "taobao")
+    assert r["risk_level"] == "clean"
+    assert not any(x["category"] == "绝对化用语" for x in r["hits"])

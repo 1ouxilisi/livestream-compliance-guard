@@ -7,16 +7,18 @@
 ## 1. Title candidates
 
 **English**
+- `Custom content moderation MCP: banned words, prohibited claims and rewrite checks`
+- `Policy compliance filter for scripts, product copy and replies with safe rewrite`
+- `Deterministic rule-based content safety checker integrated as an MCP tool for your agent`
 - `I will build a live-commerce compliance guard MCP for banned words, claims and diversion`
-- `I will audit and rewrite live-stream / product-copy wording against ad law and platform rules`
-- `I will deliver a pluggable rule lexicon + optional LLM review for Chinese e-commerce scripts`
+- `I will deliver a pluggable rule lexicon + optional LLM review for e-commerce scripts`
 
 **中文（备用）**
 - `直播话术合规筛查与改写：极限词 / 虚假宣传 / 升值承诺 / 医疗功效 / 站外导流检测`
 
 ## 2. One-line summary
 
-A deterministic, auditable rule core with an optional LLM layer that checks live-stream scripts, short-video copy, product titles and replies before publication — returning a risk level, matched terms, regulatory basis and a compliant rewrite. Degrades to rules-only when no model key is available; the rule floor can never be lowered by the LLM.
+A deterministic, auditable rule core with an optional LLM layer that checks scripts, short-video copy, product titles and replies before publication — returning a risk level, matched terms, policy basis and a compliant rewrite. Degrades to rules-only when no model key is available; the rule floor can never be lowered by the LLM. The lexicon is pluggable and can be adapted to your own industry, platform or policy wording.
 
 ## 3. What's included (capabilities)
 
@@ -33,7 +35,7 @@ A deterministic, auditable rule core with an optional LLM layer that checks live
 ### Covered today
 - Platforms: Douyin, Kuaishou, WeChat Channels shop, Taobao Live.
 - Industries: general, jadeite, food/health-food, cosmetics.
-- Rule layer: 72 offline cases, 100% pass (100% high-risk recall, 0% clean false positives); 140 unit tests; aggregated 20 rules / 31 replacements.
+- Rule layer: 75 offline cases, 100% pass (100% high-risk recall, 0% clean false positives); 146 unit tests; aggregated 20 rules / 31 replacements.
 - Online LLM snapshot: 24/24 historical (results fluctuate with model version and balance; latest snapshot in `reports/LLM_EVAL.md`).
 
 ## 4. Deliverable tiers (structure only — price TBD)

@@ -40,3 +40,5 @@
 {"id":"a40","industry":"jadeite","platform":"douyin","expect_risk":"high","expect_any":["之王","收藏级","玻璃种"],"text":"这个翡翠是老坑玻璃种，收藏级满绿，性价比之王。","note":"夸饰品相叠加“之王”绝对化，升至 high"}
 {"id":"a41","industry":"food","platform":"douyin","expect_risk":"high","expect_any":["患者反馈","无效退款"],"text":"医生都在喝的酵素，患者反馈血糖稳了，无效退款。","note":"医疗代言+疗效暗示+无效退款，判 high"}
 {"id":"a42","industry":"general","platform":"taobao","expect_risk":"high","expect_any":["私下转账","支付宝直转"],"text":"拍下后私下转账给你，走支付宝直转更便宜。","note":"站外私下交易与支付宝直转，淘宝规则判 high"}
+{"id":"a43","industry":"general","platform":"douyin","expect_risk":"high","text":"这是最/好的一款，没有之一。","note":"斜杠分隔阻断“最好”，紧凑层剥离斜杠后规则层判 high"}
+{"id":"a44","industry":"general","platform":"douyin","expect_risk":"high","text":"想要优惠加 v/x：abc12345 私下聊。","note":"斜杠分隔联系方式字母，紧凑层剥离后命中严格导流正则判 high"}

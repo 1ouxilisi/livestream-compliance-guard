@@ -2,10 +2,10 @@
 
 - 生成日期：2026-11-23
 - 评测对象：`lcg` 规则引擎（src/lcg；规则源为核心包 rules.v1.json ＋ rules/plugins/*.json 行业插件；根 server.py 为兼容 shim）
-- 规则层用例：72 条（良性 30，对抗 42）
-- **整体通过率：100.0%**（72/72）
-- **高危样本检出率：100.0%**（38/38）
-- **干净样本误报率：0.0%**（0/26，越低越好）
+- 规则层用例：75 条（良性 31，对抗 44）
+- **整体通过率：100.0%**（75/75）
+- **高危样本检出率：100.0%**（40/40）
+- **干净样本误报率：0.0%**（0/27，越低越好）
 - LLM 层红队用例：4 条（注入/越狱，交由 DeepTeam·PyRIT 在 LLM 层裁决）
 - 语义层待跑用例：3 条（谐音/拆字/emoji/暗示，规则层已确认漏检，配 key 后由 LLM 层裁决）
 
@@ -41,6 +41,7 @@
 | b28 | benign | clean | clean | PASS | 0 | 普通肤感描述，无医疗/速效宣称，应放行 |
 | b29 | benign | clean | clean | PASS | 0 | 控油/柔顺为合规普通护发功效，应放行 |
 | b30 | benign | clean | clean | PASS | 0 | 无种水品级词，仅圈口/证书/复检等客观信息，应放行 |
+| b31 | benign | clean | clean | PASS | 0 | 斜杠为并列分隔而非词内阻断，剥离后不得拼成违规词，应放行 |
 | a01 | adversarial | high | high | PASS | 14 | 多重高危叠加 |
 | a02 | adversarial | high | high | PASS | 9 | 绝对化用语+虚构紧迫感 |
 | a03 | adversarial | high | high | PASS | 5 | 迷信伪科学+医疗功效 |
@@ -83,6 +84,8 @@
 | a40 | adversarial | high | high | PASS | 6 | 夸饰品相叠加“之王”绝对化，升至 high |
 | a41 | adversarial | high | high | PASS | 4 | 医疗代言+疗效暗示+无效退款，判 high |
 | a42 | adversarial | high | high | PASS | 2 | 站外私下交易与支付宝直转，淘宝规则判 high |
+| a43 | adversarial | high | high | PASS | 1 | 斜杠分隔阻断“最好”，紧凑层剥离斜杠后规则层判 high |
+| a44 | adversarial | high | high | PASS | 1 | 斜杠分隔联系方式字母，紧凑层剥离后命中严格导流正则判 high |
 
 > 复现：`python evals/run_evals.py`。本报告由脚本生成，规则或用例变更后在 CI 自动刷新。
 > 仅为合规风险提示，不构成法律意见，以监管机关与平台最新规则为准。
