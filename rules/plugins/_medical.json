@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "package": "medical",
+    "format": "lcg-plugin/1",
+    "language": "zh-CN",
+    "version": "v0.0.0-placeholder",
+    "industry": "medical",
+    "status": "placeholder",
+    "pending_legal_review": true,
+    "rule_count": 0,
+    "replacement_count": 0,
+    "note": "占位骨架，未收录任何判定规则。药品、医疗器械、特殊医学用途配方食品的注册备案、适应症与说明书口径属强监管领域，须经法务与药监规则复核、补齐可溯源法条后，再去掉文件名前缀下划线并在 models.INDUSTRIES 注册。当前不得据此对外作合规结论。",
+    "sources": []
+  },
+  "rules": [],
+  "replacements": {}
+}

@@ -13,6 +13,8 @@ lcg —— livestream-compliance-guard 规则引擎包（能力标准件 ①）�
   aggregator.py    整场结果分布/类别/主播聚合与待整改清单（纯统计）
   feedback.py      误报/漏报/存疑本地 JSONL 记录与 CSV 导出（可选启用）
   audit.py         可选本地 JSONL 审计留痕（默认关闭、可脱敏；零依赖）
+  sources.py       可插拔输入源协议与内存桩（不接真实 ASR/OCR、不发网络请求）
+  tenant.py        租户配额与用量计量内存骨架（无持久化、无鉴权；演进见 DEPLOYMENT.md）
   server_stdio.py  FastMCP stdio 入口（依赖 mcp）
   server_http.py   Streamable HTTP + Bearer 鉴权入口（依赖 mcp/uvicorn）
 
@@ -35,7 +37,7 @@ from .rules_store import (
     replacements,
 )
 
-__version__ = "0.7.2"
+__version__ = "0.7.3"
 
 __all__ = [
     "__version__",

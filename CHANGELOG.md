@@ -4,6 +4,22 @@
 
 规则库内容版本见 `rules/rules.v1.json` 的 `meta.version`（核心包当前 **v1.4**），与软件包版本相互独立；行业插件包在 `rules/plugins/*.json` 各自维护版本。
 
+## [0.7.3] - 2026-11-23
+
+成品样例与对外物料补齐；输入源 / 配额计量骨架与强监管占位插件落地；运行时判定 API 与规则结论不变。
+
+### 新增
+- **周报导出脚本** `scripts/export_report.py`：离线生成整场 HTML 周报（风险分布 / 类别 / 主播分级 / 待整改 / 明细）、批量 CSV、改写前后对照 CSV、反馈导出 CSV；零第三方依赖，支持 `--input` / `--industry` / `--platform` / `--out-dir`。
+- **成品样例** `samples/`：由脚本可复现的报告与对照表快照（虚构示例数据，不代表真实客户 / 场次），附字段说明与复现命令。
+- **英文 README** `README.en.md` 与 **Gig 文案草稿** `docs/GIG_LISTING.md`：能力清单、交付档位骨架、边界与平台内交易口径；定价留空待发布人确定。
+- **输入源协议骨架** `src/lcg/sources.py`：`TranscriptSource` 协议 + `ListSource` / `StubSource` 内存实现；不含真实 ASR/OCR、不发网络请求。
+- **配额计量骨架** `src/lcg/tenant.py`：进程内租户注册、调用 / token 扣减与用量快照；无持久化、无鉴权、不跨进程共享。
+- **强监管 / 跨境占位插件** `rules/plugins/_medical/_finance/_education/_alcohol/_crossborder.json`：空规则占位、`pending_legal_review`，下划线前缀不参与加载。
+
+### 变更
+- 文档口径同步：DEPLOYMENT / SCOPE_BOUNDARY 标注 tenant / sources 为骨架、占位插件未启用；README 架构段与导航补 samples、英文 README、GIG 草稿。
+- 回归：ruff 全仓通过、pytest **140 项**全绿、规则评测 **72/72**；软件包版本升至 **0.7.3**（核心规则库 v1.4，行业插件 v1.0）。
+
 ## [0.7.2] - 2026-11-23
 
 演示走查脚本、录屏分镜文档、治理层底层件与 CI 守门补齐；运行时判定 API 与规则结论不变。
@@ -15,7 +31,9 @@
 - **整场聚合** `src/lcg/aggregator.py`：对批量结果做风险等级分布、命中类别、按主播最高风险/分段数/high 命中数与待整改清单统计；只归类不改判定结论。
 - **反馈闭环** `src/lcg/feedback.py`：误报/漏报/存疑记录到本地 JSONL（`LCG_FEEDBACK_LOG`，未配置则禁用），支持读回与 UTF-8 BOM CSV 导出，作为规则迭代与评测扩充输入。
 - **本地审计留痕** `src/lcg/audit.py`：可选 JSONL 事件落盘（`LCG_AUDIT_LOG`），默认关闭；`LCG_AUDIT_REDACT=1` 时不写原始话术、仅留长度与截断命中片段；写盘异常不影响主流程。
-- **行业插件模板** `rules/plugins/_template.json`：下划线前缀文件视为模板/占位，不参与聚合加载与校验；新增插件流程见 `CONTRIBUTING.md`。
+- **输入源协议骨架** `src/lcg/sources.py`：定义 `TranscriptSource` 协议与 `ListSource`/`StubSource` 内存实现，统一交付给 `ingest` 归一；不含真实 ASR/OCR 模型、不发起网络请求。
+- **配额计量骨架** `src/lcg/tenant.py`：进程内租户注册、调用/token 扣减与用量快照（`InMemoryQuotaStore`/`UsageMeter`）；无持久化、无鉴权、不跨进程共享，生产多租户需外置存储与账号体系（见 DEPLOYMENT.md）。
+- **行业插件模板与占位骨架**：`rules/plugins/_template.json` 为模板；`_medical/_finance/_education/_alcohol/_crossborder.json` 为空规则占位（`status: placeholder`、`pending_legal_review`），下划线前缀不参与聚合加载与校验；新增插件流程见 `CONTRIBUTING.md`。
 - **部署与平台化演进文档** `docs/DEPLOYMENT.md`：梳理当前单租户自托管边界、配置项速查、生产部署建议，以及多租户/鉴权/配额计费/存储/无状态化等尚未实现的演进方向，避免把路线图当成现有功能。
 
 ### 变更
@@ -23,7 +41,7 @@
 - `rules_store` 跳过下划线前缀插件文件；`CONTRIBUTING.md` 补充新增行业插件的完整流程。
 - CI 增加 Ruff 静态检查与 wheel 打包守门（构建后解包断言规则词库随包打入，防止独立安装后加载空词库）。
 - 清理 `evals/run_evals.py` 历史 lint：import 排序、移除未用导入、去除冗余 f 前缀、长行折行。
-- 回归：ruff 全仓通过、pytest **123 项**全绿、规则评测 **72/72**；软件包版本升至 **0.7.2**（核心规则库 v1.4，行业插件 v1.0）。
+- 回归：ruff 全仓通过、pytest **140 项**全绿、规则评测 **72/72**；软件包版本升至 **0.7.2**（核心规则库 v1.4，行业插件 v1.0）。
 
 ## [0.7.1] - 2026-11-23
 

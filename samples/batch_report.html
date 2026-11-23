@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>直播合规周报（示例）</title>
+<style>
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 2rem; color: #1f2328; background: #f6f8fa;
+  }
+  h1 { font-size: 1.4rem; }
+  .meta { color: #57606a; font-size: .9rem; margin-bottom: 1rem; }
+  .badge {
+    color: #fff; border-radius: 10px; padding: 2px 10px;
+    font-size: .82rem; white-space: nowrap;
+  }
+  .cards { display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+  .card {
+    background: #fff; border: 1px solid #d0d7de;
+    border-radius: 10px; padding: .8rem 1.1rem;
+  }
+  .card .num { font-size: 1.3rem; font-weight: 600; }
+  table {
+    border-collapse: collapse; width: 100%; background: #fff;
+    margin: .6rem 0 1.4rem; font-size: .9rem;
+  }
+  th, td { border: 1px solid #d0d7de; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #eaeef2; }
+  section { margin-bottom: 1.6rem; }
+  .footnote { color: #57606a; font-size: .8rem; }
+</style>
+</head>
+<body>
+<h1>直播合规周报（演示样例）</h1>
+<p class="meta">行业：general ｜ 平台：douyin ｜
+本页由 <code>scripts/export_report.py</code> 离线生成，示例数据不代表真实场次。</p>
+<div class="cards">
+  <div class="card"><div>总体风险</div>
+  <div class="num"><span class="badge" style="background:#cf222e">high · 高风险</span></div></div>
+  <div class="card"><div>分段数</div><div class="num">5</div></div>
+  <div class="card"><div>标记风险分段</div>
+  <div class="num">3</div></div>
+  <div class="card"><div>high 命中</div><div class="num">14</div></div>
+</div>
+<section>
+  <h2>风险分布</h2>
+  <table><tr><th>级别</th><th>段数</th><th>占比</th></tr><tr><td><span class="badge" style="background:#1a7f37">clean · 合规</span></td><td>2</td><td>40%</td></tr><tr><td><span class="badge" style="background:#bf8700">low · 低风险</span></td><td>1</td><td>20%</td></tr><tr><td><span class="badge" style="background:#bc4c00">medium · 中风险</span></td><td>0</td><td>0%</td></tr><tr><td><span class="badge" style="background:#cf222e">high · 高风险</span></td><td>2</td><td>40%</td></tr></table>
+</section>
+<section>
+  <h2>命中类别</h2>
+  <table><tr><th>类别</th><th>次数</th></tr><tr><td>绝对化用语</td><td>7</td></tr><tr><td>虚假/误导宣传</td><td>4</td></tr><tr><td>升值/投资承诺</td><td>3</td></tr><tr><td>诱导性话术</td><td>2</td></tr><tr><td>泛化最高级</td><td>1</td></tr></table>
+</section>
+<section>
+  <h2>按主播分级</h2>
+  <table><tr><th>主播</th><th>最高风险</th><th>分段数</th><th>high 命中</th></tr><tr><td>主播A</td><td><span class="badge" style="background:#bf8700">low · 低风险</span></td><td>2</td><td>0</td></tr><tr><td>主播B</td><td><span class="badge" style="background:#cf222e">high · 高风险</span></td><td>2</td><td>14</td></tr><tr><td>主播C</td><td><span class="badge" style="background:#1a7f37">clean · 合规</span></td><td>1</td><td>0</td></tr></table>
+</section>
+<section>
+  <h2>待整改清单</h2>
+  <table><tr><th>序号</th><th>主播</th><th>话术</th><th>风险</th><th>类别</th></tr><tr><td>1</td><td>主播B</td><td>全网最低价，国家级大师作品，销量第一，百分百纯天然！</td><td><span class="badge" style="background:#cf222e">high · 高风险</span></td><td>泛化最高级, 绝对化用语, 诱导性话术</td></tr><tr><td>2</td><td>主播A</td><td>喜欢的扣1，家人们看看这款冰种手镯，配证书支持复检。</td><td><span class="badge" style="background:#bf8700">low · 低风险</span></td><td>诱导性话术</td></tr><tr><td>3</td><td>主播B</td><td>买这个稳赚不赔，保值升值空间巨大，错过再无！</td><td><span class="badge" style="background:#cf222e">high · 高风险</span></td><td>升值/投资承诺, 虚假/误导宣传</td></tr></table>
+</section>
+<section>
+  <h2>分段明细</h2>
+  <table><tr><th>序号</th><th>主播</th><th>话术</th><th>风险</th><th>命中</th></tr><tr><td>0</td><td>主播A</td><td>这款保温杯304不锈钢内胆，一年质保，48小时内发货。</td><td><span class="badge" style="background:#1a7f37">clean · 合规</span></td><td></td></tr><tr><td>1</td><td>主播B</td><td>全网最低价，国家级大师作品，销量第一，百分百纯天然！</td><td><span class="badge" style="background:#cf222e">high · 高风险</span></td><td>绝对化用语·国家级; 绝对化用语·最低; 绝对化用语·第一; 绝对化用语·销量第一; 绝对化用语·百分百; 绝对化用语·第一; 绝对化用语·全网最; 泛化最高级·最低; 诱导性话术·全网最低</td></tr><tr><td>2</td><td>主播A</td><td>喜欢的扣1，家人们看看这款冰种手镯，配证书支持复检。</td><td><span class="badge" style="background:#bf8700">low · 低风险</span></td><td>诱导性话术·家人们</td></tr><tr><td>3</td><td>主播B</td><td>买这个稳赚不赔，保值升值空间巨大，错过再无！</td><td><span class="badge" style="background:#cf222e">high · 高风险</span></td><td>虚假/误导宣传·稳赚; 虚假/误导宣传·稳赚不赔; 虚假/误导宣传·错过再无; 虚假/误导宣传·稳赚不赔; 升值/投资承诺·保值; 升值/投资承诺·升值; 升值/投资承诺·升值空间</td></tr><tr><td>4</td><td>主播C</td><td>蓝帽认证保健食品，增强免疫力，本品不能代替药物。</td><td><span class="badge" style="background:#1a7f37">clean · 合规</span></td><td></td></tr></table>
+</section>
+<p class="footnote">本工具仅为合规风险提示与改写建议，不构成法律意见；
+法条与平台规则以监管机关及平台最新规则为准。</p>
+</body>
+</html>

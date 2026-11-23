@@ -46,6 +46,8 @@ python server.py --selftest             # 端到端自测
 5. 运行 `python scripts/export_rules.py` 规范化写回；在 `evals/cases/` 补该行业的命中用例与良性防误报用例；
 6. 跑完全部本地验证再提交。
 
+> `rules/plugins/_*.json`（如 `_medical.json`、`_finance.json`）是**未启用占位骨架**：空规则、标注 `pending_legal_review`，下划线前缀不会被加载。转正时复制为正式包、去掉下划线前缀、补齐可溯源规则，再按上面 1–6 步注册行业与补评测；强监管行业须先经法务复核。
+
 
 ## 代码约定
 

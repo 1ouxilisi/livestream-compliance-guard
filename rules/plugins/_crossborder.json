@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "package": "crossborder",
+    "format": "lcg-plugin/1",
+    "language": "en-US",
+    "version": "v0.0.0-placeholder",
+    "industry": "crossborder",
+    "status": "placeholder",
+    "pending_legal_review": true,
+    "rule_count": 0,
+    "replacement_count": 0,
+    "note": "Placeholder skeleton with no rules yet. Cross-border / English-language compliance (e.g. TikTok Shop, Amazon Live) depends on target-market regulations and platform policies; legal review and sourced rules are required before filling this pack. Do not use it as a compliance conclusion.",
+    "sources": []
+  },
+  "rules": [],
+  "replacements": {}
+}

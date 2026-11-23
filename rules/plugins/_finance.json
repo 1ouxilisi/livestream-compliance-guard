@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "package": "finance",
+    "format": "lcg-plugin/1",
+    "language": "zh-CN",
+    "version": "v0.0.0-placeholder",
+    "industry": "finance",
+    "status": "placeholder",
+    "pending_legal_review": true,
+    "rule_count": 0,
+    "replacement_count": 0,
+    "note": "占位骨架，未收录任何判定规则。金融、理财、保险、证券、收藏品投资的收益承诺、资质牌照与风险揭示由持牌机构和专门规则约束，须经法务/金融监管口径复核后再填充。当前不得据此对外作合规结论。",
+    "sources": []
+  },
+  "rules": [],
+  "replacements": {}
+}

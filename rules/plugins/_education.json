@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "package": "education",
+    "format": "lcg-plugin/1",
+    "language": "zh-CN",
+    "version": "v0.0.0-placeholder",
+    "industry": "education",
+    "status": "placeholder",
+    "pending_legal_review": true,
+    "rule_count": 0,
+    "replacement_count": 0,
+    "note": "占位骨架，未收录任何判定规则。教育培训的升学/保过/名师资质/收费退费等宣传受专门规范约束，须经法务与教育主管部门规则复核后再填充。当前不得据此对外作合规结论。",
+    "sources": []
+  },
+  "rules": [],
+  "replacements": {}
+}
