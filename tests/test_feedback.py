@@ -57,3 +57,31 @@ def test_load_skips_corrupt_lines(tmp_path):
     p.write_text('{"feedback":"review"}\n坏行\n{"feedback":"false_positive"}\n',
                  encoding="utf-8")
     assert len(feedback.load(str(p))) == 2
+
+
+def test_feedback_sqlite_roundtrip(tmp_path):
+    db = str(tmp_path / "feedback.db")
+    ok = feedback.submit(
+        text="这款精华帮助祛痘控油，温和不刺激。", industry="cosmetics",
+        platform="douyin", reported_risk="medium", feedback="false_positive",
+        note="合规妆效被误报", category="化妆品-医疗作用宣称", path=db)
+    assert ok is True
+    rows = feedback.load(db)
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["feedback"] == "false_positive"
+    assert row["reported_risk"] == "medium"
+    assert row["industry"] == "cosmetics"
+    assert row["text"].startswith("这款精华")
+    out = tmp_path / "fb.csv"
+    assert feedback.export_csv(rows, str(out)) == 1
+
+
+def test_feedback_sqlite_persists_across_reopen(tmp_path):
+    from lcg import ledger
+
+    db = str(tmp_path / "feedback.db")
+    feedback.submit(text="话术一", industry="food", platform="douyin",
+                    reported_risk="high", feedback="false_negative", path=db)
+    ledger.close_all()
+    assert len(feedback.load(db)) == 1

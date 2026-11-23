@@ -3,12 +3,11 @@
 lcg.audit —— 检测/改写结果的本地审计留痕（零第三方依赖，可选启用）。
 
 设计原则：
-  · **默认关闭**：未设置环境变量 ``LCG_AUDIT_LOG``（JSONL 文件路径）时不落盘，
-    与规则核心“零配置可跑”一致；
+  · **默认关闭**：未设置环境变量 ``LCG_AUDIT_LOG``（路径）时不落盘；
   · **不拖垮主流程**：任何写盘异常都被吞掉并记录到返回值，绝不影响检测结果；
-  · **可脱敏**：``LCG_AUDIT_REDACT=1`` 时不写入原始话术，仅保留长度与命中片段
-    （片段截断），避免在审计日志里沉淀主播口播原文等敏感内容；
-  · 每行一个 JSON 对象（JSONL），便于后续用 ``load_events`` 复核或导入报表。
+  · **可脱敏**：``LCG_AUDIT_REDACT=1`` 时不写入原始话术，仅保留长度与命中片段；
+  · **双后端**：路径为 ``:memory:`` 或 ``.db/.sqlite/.sqlite3`` 时写 SQLite，
+    其余按 JSONL 文本追加；两种后端读回结构一致，便于复核或导入报表。
 
 注意：本模块只做本地结构化留痕，不做上传、不做远程汇聚；合规责任与数据留存
 策略由部署方按自身业务与所在地法规确定。
@@ -17,13 +16,34 @@ from __future__ import annotations
 
 import json
 import os
+import sqlite3
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from . import ledger
+
 _LOCK = threading.Lock()
 _MAX_MATCH = 20
+
+_SCHEMA = """
+CREATE TABLE IF NOT EXISTS audit_events (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts          TEXT NOT NULL,
+    action      TEXT NOT NULL,
+    industry    TEXT NOT NULL DEFAULT '',
+    platform    TEXT NOT NULL DEFAULT '',
+    risk_level  TEXT NOT NULL DEFAULT '',
+    mode        TEXT NOT NULL DEFAULT 'rule',
+    count       INTEGER NOT NULL DEFAULT 0,
+    hits        TEXT NOT NULL DEFAULT '[]',
+    llm         TEXT NOT NULL DEFAULT '{}',
+    text_len    INTEGER,
+    redacted    INTEGER NOT NULL DEFAULT 0,
+    text        TEXT
+);
+"""
 
 
 def _log_path() -> Optional[Path]:
@@ -83,20 +103,75 @@ def build_event(*, action: str, result: Dict[str, Any], text: str,
     return event
 
 
+def _insert_sqlite(conn: sqlite3.Connection, event: Dict[str, Any]) -> None:
+    conn.execute(
+        "INSERT INTO audit_events "
+        "(ts, action, industry, platform, risk_level, mode, count, hits, llm, "
+        " text_len, redacted, text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            event["ts"], event["action"], event.get("industry", ""),
+            event.get("platform", ""), event.get("risk_level", ""),
+            event.get("mode", "rule"), event.get("count", 0),
+            json.dumps(event.get("hits", []), ensure_ascii=False),
+            json.dumps(event.get("llm", {}), ensure_ascii=False),
+            event.get("text_len"), 1 if event.get("redacted") else 0,
+            event.get("text"),
+        ),
+    )
+
+
+def _load_sqlite(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
+    rows = conn.execute(
+        "SELECT ts, action, industry, platform, risk_level, mode, count, hits, "
+        "llm, text_len, redacted, text FROM audit_events ORDER BY id"
+    ).fetchall()
+    events: List[Dict[str, Any]] = []
+    for row in rows:
+        event: Dict[str, Any] = {
+            "ts": row["ts"], "action": row["action"],
+            "industry": row["industry"], "platform": row["platform"],
+            "risk_level": row["risk_level"], "mode": row["mode"],
+            "count": row["count"],
+            "hits": json.loads(row["hits"] or "[]"),
+            "llm": json.loads(row["llm"] or "{}"),
+            "redacted": bool(row["redacted"]),
+        }
+        if event["redacted"]:
+            event["text_len"] = row["text_len"] or 0
+        else:
+            event["text"] = row["text"] or ""
+        events.append(event)
+    return events
+
+
 def record(*, action: str, result: Dict[str, Any], text: str,
            path: Optional[str] = None, redact: Optional[bool] = None) -> bool:
-    """把一条检测/改写结果追加到审计 JSONL；返回是否成功落盘。
+    """追加一条检测/改写结果；返回是否成功落盘。
 
-    未配置路径时直接返回 False（视为禁用）；写盘异常不抛出。
+    未配置路径时直接返回 False（视为禁用）；写盘异常不抛出。路径为 SQLite DSN
+    时入库 ``audit_events`` 表，否则追加 JSONL。
     """
-    target = Path(path) if path else _log_path()
-    if target is None:
+    target = path if path is not None else (_log_path().as_posix() if _log_path() else "")
+    if not target:
         return False
     event = build_event(action=action, result=result, text=text, redact=redact)
+
+    if ledger.is_sqlite_dsn(target):
+        try:
+            with _LOCK:
+                conn = ledger.connect(target)
+                conn.execute(_SCHEMA)
+                _insert_sqlite(conn, event)
+                conn.commit()
+            return True
+        except sqlite3.Error:
+            return False
+
+    file_path = Path(target)
     line = json.dumps(event, ensure_ascii=False)
     try:
-        target.parent.mkdir(parents=True, exist_ok=True)
-        with _LOCK, target.open("a", encoding="utf-8") as fh:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with _LOCK, file_path.open("a", encoding="utf-8") as fh:
             fh.write(line + "\n")
         return True
     except OSError:
@@ -104,7 +179,17 @@ def record(*, action: str, result: Dict[str, Any], text: str,
 
 
 def load_events(path: str) -> List[Dict[str, Any]]:
-    """读回审计 JSONL；损坏行跳过并继续，返回可解析的事件列表。"""
+    """读回审计事件；损坏行跳过，SQLite 与 JSONL 结构一致。"""
+    if not path:
+        return []
+    if ledger.is_sqlite_dsn(path):
+        try:
+            with _LOCK:
+                conn = ledger.connect(path)
+                conn.execute(_SCHEMA)
+                return _load_sqlite(conn)
+        except sqlite3.Error:
+            return []
     p = Path(path)
     if not p.is_file():
         return []

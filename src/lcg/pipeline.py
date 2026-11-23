@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from . import audit, engine, rules_store
+from . import audit, engine, request_ctx, rules_store
 from .llm import PROMPT_VERSION, REWRITE_PROMPT_VERSION, LLMConfig, LLMFinding, LLMJudge
 from .models import SEV_ORDER, normalize_text, validate_context
 
@@ -48,6 +48,18 @@ def _blank_meta() -> Dict[str, Any]:
             "rewrite_prompt_version": REWRITE_PROMPT_VERSION,
             "cached": False, "calls": 0, "error": "",
             "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+
+def _backfill_tokens(total_tokens: int) -> None:
+    """把本次调用的 LLM token 用量回填到当前请求归属租户；无归属或用量为 0 则跳过。"""
+    ctx = request_ctx.current()
+    if ctx is None or total_tokens <= 0:
+        return
+    try:
+        ctx.meter.record(ctx.tenant_id, calls=0, tokens=total_tokens)
+    except Exception:
+        # 计量回填异常不阻断主流程，与计量层容错口径一致
+        pass
 
 
 def _categories(industry: str, platform: str):
@@ -133,6 +145,7 @@ def analyze(text: str, industry: str = "general", platform: str = "douyin", *,
         "disclaimer": _DISCLAIMER,
     }
     audit.record(action="detect", result=res, text=orig)
+    _backfill_tokens(res["llm"].get("total_tokens", 0))
     return res
 
 
@@ -190,4 +203,5 @@ def smart_rewrite(text: str, industry: str = "general", platform: str = "douyin"
         "llm": meta,
     })
     audit.record(action="rewrite", result=out, text=orig)
+    _backfill_tokens(out["llm"].get("total_tokens", 0))
     return out

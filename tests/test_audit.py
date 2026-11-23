@@ -70,3 +70,35 @@ def test_build_event_clips_long_match():
     ev = audit.build_event(action="detect", result=res, text=TEXT)
     assert len(ev["hits"][0]["match"]) <= audit._MAX_MATCH + 1
     assert ev["hits"][0]["match"].endswith("…")
+
+
+def test_audit_sqlite_roundtrip(tmp_path):
+    db = str(tmp_path / "audit.db")
+    assert audit.record(action="detect", result=RESULT, text=TEXT, path=db) is True
+    events = audit.load_events(db)
+    assert len(events) == 1
+    ev = events[0]
+    assert ev["action"] == "detect"
+    assert ev["risk_level"] == "high"
+    assert ev["hits"][0]["match"] == "最好"
+    assert ev["llm"]["total_tokens"] == 120
+    assert ev["text"] == TEXT
+
+
+def test_audit_sqlite_redact_roundtrip(tmp_path):
+    db = str(tmp_path / "audit.db")
+    audit.record(action="rewrite", result=RESULT, text=TEXT,
+                 path=db, redact=True)
+    ev = audit.load_events(db)[0]
+    assert "text" not in ev
+    assert ev["redacted"] is True
+    assert ev["text_len"] == len(TEXT)
+
+
+def test_audit_sqlite_persists_across_reopen(tmp_path):
+    from lcg import ledger
+
+    db = str(tmp_path / "audit.db")
+    audit.record(action="detect", result=RESULT, text=TEXT, path=db)
+    ledger.close_all()
+    assert len(audit.load_events(db)) == 1

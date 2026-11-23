@@ -67,3 +67,27 @@ def test_consume_never_raises_on_unknown():
     store = InMemoryQuotaStore()
     # 未注册 / 异常入参都应返回 False 而非抛错
     assert store.consume("ghost") is False
+
+
+def test_meter_check_pass_for_active_within_quota():
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t1", name="一号", quota_calls=10))
+    assert meter.check("t1", calls=1) == (True, "ok")
+
+
+def test_meter_check_unknown_tenant():
+    meter = UsageMeter()
+    assert meter.check("ghost", calls=1) == (False, "unknown_tenant")
+
+
+def test_meter_check_disabled_tenant():
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t1", name="一号", active=False))
+    assert meter.check("t1", calls=1) == (False, "tenant_disabled")
+
+
+def test_meter_check_exceeded_calls():
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t1", name="一号", quota_calls=2))
+    assert meter.record("t1", calls=2) is True
+    assert meter.check("t1", calls=1) == (False, "quota_exceeded")

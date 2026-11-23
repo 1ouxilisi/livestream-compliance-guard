@@ -289,3 +289,43 @@ def test_config_price_from_env(monkeypatch):
     c = LLMConfig.from_env()
     assert c.price_input_per_mtok == 2.5
     assert c.price_output_per_mtok == 8.0
+
+
+# ---------- token 用量回填到请求归属租户 ----------
+def test_backfill_tokens_to_request_tenant():
+    from lcg import request_ctx
+    from lcg.tenant import Tenant, UsageMeter
+
+    fake = FakeBackend(detect_payload=high_payload(),
+                       usage={"prompt_tokens": 120, "completion_tokens": 30,
+                              "total_tokens": 150})
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t1", name="一号"))
+    token = request_ctx.set_request(
+        request_ctx.RequestContext(tenant_id="t1", meter=meter))
+    try:
+        r = analyze(A, "general", "douyin", judge=make_judge(fake))
+        assert r["llm"]["total_tokens"] == 150
+    finally:
+        request_ctx.reset(token)
+    snap = meter.snapshot()["t1"]
+    assert snap["tokens"] == 150
+    # calls 由 HTTP 鉴权层记一次；回填只补 token，不重复计 calls
+    assert snap["calls"] == 0
+
+
+def test_no_request_ctx_skips_backfill():
+    from lcg import request_ctx
+    from lcg.tenant import Tenant, UsageMeter
+
+    request_ctx.set_request(None)
+    fake = FakeBackend(detect_payload=high_payload(),
+                       usage={"prompt_tokens": 1, "completion_tokens": 1,
+                              "total_tokens": 150})
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t1", name="一号"))
+    analyze(A, "general", "douyin", judge=make_judge(fake))
+    snap = meter.snapshot()["t1"]
+    # 无请求归属时不回填 token，也不重复计 calls
+    assert snap["tokens"] == 0
+    assert snap["calls"] == 0

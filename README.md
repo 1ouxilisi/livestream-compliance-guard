@@ -3,7 +3,7 @@
 > Real-time banned-word / absolute-term / false-claim detection for **live commerce** hosts, AI shopping agents and digital-human sellers — China Advertising Law + major platform rules, with built-in **jadeite** rules plus pluggable **food/health-food** and **cosmetics** lexicons on a shared language-neutral rule core.
 > 直播话术、短视频带货文案、商品标题、客服回复的**实时合规检测**：广告法极限词、虚假宣传、升值承诺、医疗功效、迷信、站外导流；核心包内置**翡翠**行业规则，**食品/保健食品、化妆品**为可插拔插件词库，另含抖音/快手/视频号/淘宝直播平台规则。
 
-[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.7.6-orange)]()
+[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.7.7-orange)]()
 
 > 仓库地址：`github.com/1ouxilisi/livestream-compliance-guard`；CI 徽章在仓库公开并由 GitHub Actions 跑通后对外显示。
 

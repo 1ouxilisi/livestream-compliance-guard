@@ -7,9 +7,10 @@ lcg.server_http —— 远程 MCP（Streamable HTTP）入口，含健康检查�
 - 鉴权：设置环境变量 ``LCG_BEARER_TOKEN``（单 Key，向后兼容）或
   ``LCG_BEARER_TOKENS``（逗号分隔多 Key）后，除 /healthz 外的请求必须带
   ``Authorization: Bearer <key>``，否则返回 401；均未设置则本地开放（仅限可信内网）。
-  本层做静态 Key 校验与可选 Key→租户的请求级调用计数（``LCG_KEY_TENANTS``，
-  存储由 ``LCG_STORE_DSN`` 选择内存 / SQLite）；不做账号注册 / 登录 / 角色体系。
-  token 用量回填、超额拦截与按租户数据隔离仍属后续平台化能力，见 ``docs/DEPLOYMENT.md``。
+  本层做静态 Key 校验、Key→租户映射（``LCG_KEY_TENANTS``）与配额预检：
+  停用 / 未注册返回 403、调用次数超额返回 429；放行后记一次 calls，pipeline 结束回填
+  LLM token 用量（存储由 ``LCG_STORE_DSN`` 选择内存 / SQLite）。不做账号注册 / 登录 /
+  角色体系，也不做按租户词库 / 数据隔离，见 ``docs/DEPLOYMENT.md``。
 - 监听：``LCG_HTTP_HOST``（默认 0.0.0.0）、``LCG_HTTP_PORT``（默认 8000）。
 
 运行：
@@ -25,7 +26,7 @@ from typing import Any
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
-from . import __version__, rules_store
+from . import __version__, request_ctx, rules_store
 from .server_stdio import create_mcp
 from .tenant import UsageMeter, quota_store_from_env
 
@@ -73,8 +74,9 @@ def _parse_key_tenants(raw: "str | None" = None) -> dict[str, str]:
 class BearerAuthASGI:
     """纯 ASGI 鉴权中间件（不缓冲响应体，兼容 MCP 的 SSE/流式响应）。
 
-    可选接入 ``meter``：鉴权通过后按 Key 映射的租户记一次请求级调用计数；
-    计量失败或未映射租户均不阻断请求（配额超额拦截属后续平台化能力）。
+    鉴权通过后按 Key 映射租户做配额预检：停用 / 未注册返回 403，调用次数超额返回 429；
+    放行后记一次请求级 calls，并把 (meter, tenant) 挂入请求上下文供 pipeline 回填 token 用量。
+    计量异常或未映射 Key 不阻断请求。
     """
 
     def __init__(self, app: Any, tokens: "set[str] | None" = None,
@@ -85,16 +87,28 @@ class BearerAuthASGI:
         self.meter = meter
         self.key_tenants = key_tenants or {}
 
-    def _record(self, key: str) -> None:
-        if self.meter is None:
-            return
+    def _authorize(self, key: str) -> "tuple[str | None, JSONResponse | None]":
+        """鉴权通过后做配额预检：返回 (tenant_id, None) 放行，(None, response) 拦截。"""
         tenant = self.key_tenants.get(key)
-        if not tenant:
+        if self.meter is None or not tenant:
+            return tenant, None
+        ok, reason = self.meter.check(tenant, calls=1)
+        if ok:
+            return tenant, None
+        if reason == "quota_exceeded":
+            status, error = 429, "rate_limited"
+        else:
+            status, error = 403, "forbidden"
+        return None, JSONResponse(
+            {"error": error, "detail": reason}, status_code=status)
+
+    def _record_calls(self, tenant: str) -> None:
+        if self.meter is None:
             return
         try:
             self.meter.record(tenant, calls=1)
         except Exception:
-            # 计量异常不影响主流程；配额超额/停用的拦截判定后续再接。
+            # 计量异常不阻断主流程，与计量层容错口径一致
             pass
 
     async def __call__(self, scope, receive, send) -> None:
@@ -106,8 +120,19 @@ class BearerAuthASGI:
         prefix = "Bearer "
         key = authorization[len(prefix):] if authorization.startswith(prefix) else ""
         if key in self.tokens:
-            self._record(key)
-            return await self.app(scope, receive, send)
+            tenant, blocked = self._authorize(key)
+            if blocked is not None:
+                return await blocked(scope, receive, send)
+            ctx_token = None
+            if tenant:
+                self._record_calls(tenant)
+                ctx_token = request_ctx.set_request(
+                    request_ctx.RequestContext(tenant_id=tenant, meter=self.meter))
+            try:
+                return await self.app(scope, receive, send)
+            finally:
+                if ctx_token is not None:
+                    request_ctx.reset(ctx_token)
         resp = JSONResponse(
             {"error": "unauthorized", "detail": "missing or invalid Bearer token"},
             status_code=401,

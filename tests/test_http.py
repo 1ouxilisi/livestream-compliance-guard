@@ -167,3 +167,67 @@ async def test_multi_key_bearer():
     finally:
         await _stop(server, task)
 
+
+@pytest.mark.asyncio
+async def test_disabled_tenant_rejected_403():
+    import httpx
+
+    from lcg.tenant import Tenant, UsageMeter
+
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t_cap", name="停用租户", active=False))
+    server, task, port = await _serve(["kd"], meter=meter,
+                                      key_tenants={"kd": "t_cap"})
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(f"http://127.0.0.1:{port}/mcp",
+                                  headers={"Authorization": "Bearer kd"})
+            assert r.status_code == 403
+            assert r.json()["detail"] == "tenant_disabled"
+    finally:
+        await _stop(server, task)
+
+
+@pytest.mark.asyncio
+async def test_exceeded_tenant_rejected_429():
+    import httpx
+
+    from lcg.tenant import Tenant, UsageMeter
+
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t_cap", name="限额租户", quota_calls=1))
+    server, task, port = await _serve(["kc"], meter=meter,
+                                      key_tenants={"kc": "t_cap"})
+    try:
+        async with httpx.AsyncClient() as client:
+            first = await client.post(f"http://127.0.0.1:{port}/mcp",
+                                      headers={"Authorization": "Bearer kc"})
+            assert first.status_code != 429
+            second = await client.post(
+                f"http://127.0.0.1:{port}/mcp",
+                headers={"Authorization": "Bearer kc"})
+            assert second.status_code == 429
+            assert second.json()["detail"] == "quota_exceeded"
+        assert meter.snapshot()["t_cap"]["calls"] == 1
+    finally:
+        await _stop(server, task)
+
+
+@pytest.mark.asyncio
+async def test_unregistered_tenant_rejected_403():
+    import httpx
+
+    from lcg.tenant import UsageMeter
+
+    meter = UsageMeter()
+    server, task, port = await _serve(["kx"], meter=meter,
+                                      key_tenants={"kx": "ghost"})
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(f"http://127.0.0.1:{port}/mcp",
+                                  headers={"Authorization": "Bearer kx"})
+            assert r.status_code == 403
+            assert r.json()["detail"] == "unknown_tenant"
+    finally:
+        await _stop(server, task)
+

@@ -36,9 +36,9 @@
 | `LCG_KEY_TENANTS` | Key→租户映射，逗号分隔 `key=tenant_id`；鉴权通过后按映射记请求级调用次数；未映射 Key 不计费 | 空（不映射） |
 | `LCG_STORE_DSN` | 配额 / 用量存储：空 = 进程内存；文件路径 = 本机 SQLite 落盘；`:memory:` = SQLite 内存库 | 空（内存） |
 | `LCG_HTTP_HOST` / `LCG_HTTP_PORT` | HTTP 监听地址 / 端口 | `0.0.0.0` / `8000` |
-| `LCG_AUDIT_LOG` | 审计 JSONL 路径；不设置则不落盘 | 空（关闭） |
+| `LCG_AUDIT_LOG` | 审计留痕路径：`.jsonl`/`.json`/普通路径 = JSONL 文本；`.db`/`.sqlite`/`.sqlite3` 或 `:memory:` = SQLite；不设置则不落盘 | 空（关闭） |
 | `LCG_AUDIT_REDACT` | `1` 时审计不记录原始话术，仅留长度与截断命中片段 | `0` |
-| `LCG_FEEDBACK_LOG` | 反馈 JSONL 路径；不设置则不落盘 | 空（关闭） |
+| `LCG_FEEDBACK_LOG` | 反馈留痕路径，后端分流同 `LCG_AUDIT_LOG`；不设置则不落盘 | 空（关闭） |
 
 非法配置（未知 provider、非正超时、负单价 / 负预算）会回退安全默认值并写入 `LLMConfig.warnings`，不会让服务崩溃。
 
@@ -59,8 +59,8 @@
 |---|---|---|
 | 多租户隔离 | `lcg.tenant` Tenant/配额骨架；内存或可选本机 SQLite；多共享 Key 与 Key→租户映射（请求级 calls 计数） | 租户身份、独立词库 / 插件包、数据与配置隔离、按租户配额 |
 | 账号与鉴权 | HTTP 多共享 Key 静态校验（Bearer 集合）；`LCG_KEY_TENANTS` 把 Key 映射到租户 | 用户/租户账号体系、API Key 签发与轮换、角色与权限、审计到人 |
-| 配额与计费 | `lcg.tenant` 配额扣减与用量快照；内存 + 可选本机 SQLite；HTTP 已按映射 Key 记请求级调用次数；LLM 层透传 token usage | 超额/停用的请求拦截、token 用量回填配额、外置持久化计量、对接账单与套餐；单价配置化 |
-| 存储 | 本地 JSONL（审计 / 反馈）；配额 / 用量可选本机 SQLite | 外置数据库或对象存储、留存策略、检索与导出、备份 |
+| 配额与计费 | `lcg.tenant` 配额扣减与用量快照；内存 + 可选本机 SQLite；HTTP 按映射 Key 记请求级 calls，停用/未注册返回 403、次数超额返回 429；pipeline 结束把 LLM token 回填到归属租户 | 超额 token 的强制拦截、外置持久化计量、对接账单与套餐；单价配置化 |
+| 存储 | 审计 / 反馈可选 JSONL 或本机 SQLite（按路径扩展名分流）；配额 / 用量可选本机 SQLite | 外置数据库或对象存储、留存策略、检索与导出、备份 |
 | 无状态与扩展 | 进程内缓存 / 预算 | 缓存与预算外置（Redis 等），支持多实例水平扩展 |
 | 规则运营 | 规则随版本发布；`rules/plugins/_*.json` 占位骨架 | 规则在线版本管理、灰度发布、命中反馈回流到规则评审流程 |
 | 输入接入 | `lcg.ingest` 归一契约；`lcg.sources` 输入源协议 + `Recognizer` 识别适配器协议与内存桩 | 对接真实 ASR / OCR 上游、实时字幕流；识别能力仍由外部服务承担 |

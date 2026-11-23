@@ -46,6 +46,8 @@ class QuotaStore(Protocol):
 
     def consume(self, tenant_id: str, calls: int, tokens: int) -> bool: ...
 
+    def usage(self, tenant_id: str) -> UsageRecord: ...
+
 
 class InMemoryQuotaStore:
     """进程内配额与用量存储（线程安全；重启清空，非持久化）。"""
@@ -102,6 +104,30 @@ class UsageMeter:
 
     def record(self, tenant_id: str, calls: int = 0, tokens: int = 0) -> bool:
         return self.store.consume(tenant_id, calls=calls, tokens=tokens)
+
+    def check(self, tenant_id: str, calls: int = 1) -> tuple[bool, str]:
+        """放行前预检：未注册 / 停用 / 调用次数超额返回 ``(False, reason)``。
+
+        - ``unknown_tenant``：Key 映射到的租户未在配额表注册；
+        - ``tenant_disabled``：租户被停用；
+        - ``quota_exceeded``：剩余调用次数不足。
+
+        token 用量在请求前不可知，不在此预检；超额/停用的请求拦截只看调用次数。
+        预检不扣减，扣减由 ``record`` 完成；存储异常不抛错，按放行处理（避免存储故障
+        阻断全部流量），原因记为 ``store_error``。
+        """
+        try:
+            tenant = self.store.get(tenant_id)
+            if tenant is None:
+                return False, "unknown_tenant"
+            if not tenant.active:
+                return False, "tenant_disabled"
+            usage = self.store.usage(tenant_id)
+            if tenant.quota_calls > 0 and usage.calls + calls > tenant.quota_calls:
+                return False, "quota_exceeded"
+        except Exception:
+            return True, "store_error"
+        return True, "ok"
 
     def snapshot(self) -> Dict[str, Dict[str, int]]:
         snap = getattr(self.store, "snapshot", None)
