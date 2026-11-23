@@ -2,7 +2,7 @@
 
 > Real-time banned-word / absolute-term / false-claim detection for **live-commerce** hosts, AI shopping agents and digital-human sellers — built on China Advertising Law plus major platform rules. A shared, language-neutral rule core ships built-in **jadeite** rules and pluggable **food/health-food** and **cosmetics** lexicons.
 
-[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.7.7-orange)]()
+[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.7.8-orange)]()
 
 Repository: `github.com/1ouxilisi/livestream-compliance-guard`
 

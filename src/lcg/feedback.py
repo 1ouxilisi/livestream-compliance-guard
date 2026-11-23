@@ -162,3 +162,20 @@ def export_csv(events: List[Dict[str, Any]], out_path: str) -> int:
         for ev in events:
             writer.writerow(ev)
     return len(events)
+
+
+def query(events: List[Dict[str, Any]], *, feedback: str = "", industry: str = "",
+          platform: str = "", category: str = "") -> List[Dict[str, Any]]:
+    """在已读回的反馈列表上按类型 / 行业 / 平台 / 类别过滤；空条件不过滤。"""
+    out: List[Dict[str, Any]] = []
+    for ev in events:
+        if feedback and ev.get("feedback") != feedback:
+            continue
+        if industry and ev.get("industry") != industry:
+            continue
+        if platform and ev.get("platform") != platform:
+            continue
+        if category and ev.get("category") != category:
+            continue
+        out.append(ev)
+    return out

@@ -95,7 +95,7 @@ class BearerAuthASGI:
         ok, reason = self.meter.check(tenant, calls=1)
         if ok:
             return tenant, None
-        if reason == "quota_exceeded":
+        if reason in ("quota_exceeded", "token_exceeded"):
             status, error = 429, "rate_limited"
         else:
             status, error = 403, "forbidden"
@@ -126,8 +126,11 @@ class BearerAuthASGI:
             ctx_token = None
             if tenant:
                 self._record_calls(tenant)
-                ctx_token = request_ctx.set_request(
-                    request_ctx.RequestContext(tenant_id=tenant, meter=self.meter))
+            # 身份（key_id）与租户配额解耦：鉴权通过即挂载，便于审计到人；
+            # 未映射租户时 tenant_id 留空，计量回填自动跳过。
+            ctx_token = request_ctx.set_request(
+                request_ctx.RequestContext(
+                    tenant_id=tenant or "", meter=self.meter, key_id=key))
             try:
                 return await self.app(scope, receive, send)
             finally:

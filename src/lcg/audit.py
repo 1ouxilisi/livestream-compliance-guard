@@ -41,9 +41,19 @@ CREATE TABLE IF NOT EXISTS audit_events (
     llm         TEXT NOT NULL DEFAULT '{}',
     text_len    INTEGER,
     redacted    INTEGER NOT NULL DEFAULT 0,
+    operator    TEXT NOT NULL DEFAULT '',
+    key_id      TEXT NOT NULL DEFAULT '',
     text        TEXT
 );
 """
+
+
+def _ensure_columns(conn: sqlite3.Connection) -> None:
+    """旧库平滑补列：已存在的列不重复添加。"""
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(audit_events)")}
+    for col in ("operator", "key_id"):
+        if col not in cols:
+            conn.execute(f"ALTER TABLE audit_events ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
 
 
 def _log_path() -> Optional[Path]:
@@ -74,7 +84,8 @@ def _hits_summary(hits: List[Dict[str, Any]]) -> List[Dict[str, str]]:
 
 
 def build_event(*, action: str, result: Dict[str, Any], text: str,
-                redact: Optional[bool] = None) -> Dict[str, Any]:
+                redact: Optional[bool] = None,
+                operator: str = "", key_id: str = "") -> Dict[str, Any]:
     """从 detect/analyze/rewrite 结果提炼一条审计事件（不写盘）。"""
     use_redact = _redact_enabled() if redact is None else redact
     llm = result.get("llm") or {}
@@ -93,6 +104,8 @@ def build_event(*, action: str, result: Dict[str, Any], text: str,
             "cached": llm.get("cached", False),
             "total_tokens": llm.get("total_tokens", 0),
         },
+        "operator": operator or "",
+        "key_id": key_id or "",
     }
     if use_redact:
         event["text_len"] = len(text or "")
@@ -107,7 +120,8 @@ def _insert_sqlite(conn: sqlite3.Connection, event: Dict[str, Any]) -> None:
     conn.execute(
         "INSERT INTO audit_events "
         "(ts, action, industry, platform, risk_level, mode, count, hits, llm, "
-        " text_len, redacted, text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        " text_len, redacted, operator, key_id, text) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             event["ts"], event["action"], event.get("industry", ""),
             event.get("platform", ""), event.get("risk_level", ""),
@@ -115,6 +129,7 @@ def _insert_sqlite(conn: sqlite3.Connection, event: Dict[str, Any]) -> None:
             json.dumps(event.get("hits", []), ensure_ascii=False),
             json.dumps(event.get("llm", {}), ensure_ascii=False),
             event.get("text_len"), 1 if event.get("redacted") else 0,
+            event.get("operator", ""), event.get("key_id", ""),
             event.get("text"),
         ),
     )
@@ -123,7 +138,8 @@ def _insert_sqlite(conn: sqlite3.Connection, event: Dict[str, Any]) -> None:
 def _load_sqlite(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
     rows = conn.execute(
         "SELECT ts, action, industry, platform, risk_level, mode, count, hits, "
-        "llm, text_len, redacted, text FROM audit_events ORDER BY id"
+        "llm, text_len, redacted, operator, key_id, text "
+        "FROM audit_events ORDER BY id"
     ).fetchall()
     events: List[Dict[str, Any]] = []
     for row in rows:
@@ -135,6 +151,7 @@ def _load_sqlite(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
             "hits": json.loads(row["hits"] or "[]"),
             "llm": json.loads(row["llm"] or "{}"),
             "redacted": bool(row["redacted"]),
+            "operator": row["operator"], "key_id": row["key_id"],
         }
         if event["redacted"]:
             event["text_len"] = row["text_len"] or 0
@@ -145,7 +162,8 @@ def _load_sqlite(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
 
 
 def record(*, action: str, result: Dict[str, Any], text: str,
-           path: Optional[str] = None, redact: Optional[bool] = None) -> bool:
+           path: Optional[str] = None, redact: Optional[bool] = None,
+           operator: str = "", key_id: str = "") -> bool:
     """追加一条检测/改写结果；返回是否成功落盘。
 
     未配置路径时直接返回 False（视为禁用）；写盘异常不抛出。路径为 SQLite DSN
@@ -154,13 +172,15 @@ def record(*, action: str, result: Dict[str, Any], text: str,
     target = path if path is not None else (_log_path().as_posix() if _log_path() else "")
     if not target:
         return False
-    event = build_event(action=action, result=result, text=text, redact=redact)
+    event = build_event(action=action, result=result, text=text, redact=redact,
+                        operator=operator, key_id=key_id)
 
     if ledger.is_sqlite_dsn(target):
         try:
             with _LOCK:
                 conn = ledger.connect(target)
                 conn.execute(_SCHEMA)
+                _ensure_columns(conn)
                 _insert_sqlite(conn, event)
                 conn.commit()
             return True
@@ -187,6 +207,7 @@ def load_events(path: str) -> List[Dict[str, Any]]:
             with _LOCK:
                 conn = ledger.connect(path)
                 conn.execute(_SCHEMA)
+                _ensure_columns(conn)
                 return _load_sqlite(conn)
         except sqlite3.Error:
             return []
@@ -203,3 +224,34 @@ def load_events(path: str) -> List[Dict[str, Any]]:
         except json.JSONDecodeError:
             continue
     return events
+
+
+def query(path: str, *, industry: str = "", platform: str = "",
+          action: str = "", risk_level: str = "", operator: str = "",
+          key_id: str = "", since: str = "", limit: int = 0) -> List[Dict[str, Any]]:
+    """按行业 / 平台 / 动作 / 风险 / 操作人 / Key / 起始时间过滤审计事件。
+
+    条件为空表示不过滤；``since`` 按 ISO 时间字符串字典序比较；``limit > 0`` 时只返回
+    最近 ``limit`` 条。底层读取复用 :func:`load_events`，JSONL 与 SQLite 一致。
+    """
+    events = load_events(path)
+    out: List[Dict[str, Any]] = []
+    for ev in events:
+        if industry and ev.get("industry") != industry:
+            continue
+        if platform and ev.get("platform") != platform:
+            continue
+        if action and ev.get("action") != action:
+            continue
+        if risk_level and ev.get("risk_level") != risk_level:
+            continue
+        if operator and ev.get("operator") != operator:
+            continue
+        if key_id and ev.get("key_id") != key_id:
+            continue
+        if since and ev.get("ts", "") < since:
+            continue
+        out.append(ev)
+    if limit > 0:
+        out = out[-limit:]
+    return out

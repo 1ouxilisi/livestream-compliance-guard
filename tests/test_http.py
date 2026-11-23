@@ -231,3 +231,31 @@ async def test_unregistered_tenant_rejected_403():
     finally:
         await _stop(server, task)
 
+
+
+@pytest.mark.asyncio
+async def test_http_audit_records_key_id(monkeypatch, tmp_path):
+    import httpx
+    from mcp import ClientSession
+    from mcp.client.streamable_http import streamable_http_client
+
+    from lcg import audit
+
+    db = str(tmp_path / "audit.db")
+    monkeypatch.setenv("LCG_AUDIT_LOG", db)
+    server, task, port = await _serve("kc")
+    try:
+        auth = httpx.AsyncClient(headers={"Authorization": "Bearer kc"})
+        async with auth, streamable_http_client(
+                f"http://127.0.0.1:{port}/mcp", http_client=auth) as (rd, wr, _):
+            async with ClientSession(rd, wr) as session:
+                await session.initialize()
+                await session.call_tool(
+                    "scan_smart",
+                    {"text": "100%保真，加微信", "industry": "general",
+                     "platform": "douyin", "use_llm": False})
+        events = audit.load_events(db)
+        assert events, "audit event should be recorded"
+        assert events[0]["key_id"] == "kc"
+    finally:
+        await _stop(server, task)

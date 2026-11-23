@@ -62,6 +62,14 @@ def _backfill_tokens(total_tokens: int) -> None:
         pass
 
 
+def _audit_identity() -> "tuple[str, str]":
+    """从请求上下文取审计到人字段（key_id / operator）；无上下文返回空串。"""
+    ctx = request_ctx.current()
+    if ctx is None:
+        return "", ""
+    return ctx.key_id, ctx.operator
+
+
 def _categories(industry: str, platform: str):
     return sorted({r["category"] for r in rules_store.active_rules(industry, platform)})
 
@@ -144,7 +152,9 @@ def analyze(text: str, industry: str = "general", platform: str = "douyin", *,
         "llm": meta,
         "disclaimer": _DISCLAIMER,
     }
-    audit.record(action="detect", result=res, text=orig)
+    _key_id, _operator = _audit_identity()
+    audit.record(action="detect", result=res, text=orig,
+                 key_id=_key_id, operator=_operator)
     _backfill_tokens(res["llm"].get("total_tokens", 0))
     return res
 
@@ -202,6 +212,8 @@ def smart_rewrite(text: str, industry: str = "general", platform: str = "douyin"
         "platform": platform,
         "llm": meta,
     })
-    audit.record(action="rewrite", result=out, text=orig)
+    _key_id, _operator = _audit_identity()
+    audit.record(action="rewrite", result=out, text=orig,
+                 key_id=_key_id, operator=_operator)
     _backfill_tokens(out["llm"].get("total_tokens", 0))
     return out

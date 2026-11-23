@@ -15,12 +15,14 @@ lcg —— livestream-compliance-guard 规则引擎包（能力标准件 ①）�
   audit.py         可选本地 JSONL 审计留痕（默认关闭、可脱敏；零依赖）
   sources.py       可插拔输入源协议与内存桩（不接真实 ASR/OCR、不发网络请求）
   tenant.py        租户配额与用量计量内存骨架（无持久化、无鉴权；演进见 DEPLOYMENT.md）
+  identity.py      账号/角色/API Key 内存映射骨架（无登录注册、无持久化、不跨进程）
+  cache.py         可插拔缓存协议与进程内内存实现（可选 TTL；外置 Redis 由部署方实现）
   server_stdio.py  FastMCP stdio 入口（依赖 mcp）
   server_http.py   Streamable HTTP + Bearer 鉴权入口（依赖 mcp/uvicorn）
 
 根目录 server.py 是保持向后兼容的薄 shim，re-export 本包的公共 API。
 """
-from . import engine
+from . import cache, engine, identity
 from .models import (
     INDUSTRIES,
     PLATFORMS,
@@ -37,7 +39,7 @@ from .rules_store import (
     replacements,
 )
 
-__version__ = "0.7.7"
+__version__ = "0.7.8"
 
 __all__ = [
     "__version__",
@@ -53,4 +55,6 @@ __all__ = [
     "active_rules",
     "replacements",
     "engine",
+    "identity",
+    "cache",
 ]

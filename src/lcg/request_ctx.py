@@ -24,6 +24,8 @@ if TYPE_CHECKING:  # 避免与 tenant 模块循环导入
 class RequestContext:
     tenant_id: str
     meter: "UsageMeter"
+    key_id: str = ""
+    operator: str = ""
 
 
 _CTX: ContextVar[Optional[RequestContext]] = ContextVar(

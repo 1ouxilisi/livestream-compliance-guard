@@ -15,7 +15,7 @@
 ## 2. 当前架构边界（现状，勿过度承诺）
 
 - **单进程**：LLM 语义缓存、调用预算为进程内单例（`pipeline._GLOBAL_JUDGE`），重启即清空；多实例间不共享。
-- **无账号体系**：HTTP 层支持多个共享访问 Key（`LCG_BEARER_TOKEN` 单值兼容 / `LCG_BEARER_TOKENS` 逗号分隔），仍没有用户 / 租户 / 角色概念；`lcg.tenant` 提供进程内存实现与可选本机 SQLite 后端，不做鉴权、不做跨进程隔离。
+- **账号体系为内存骨架**：HTTP 层支持多个共享访问 Key（`LCG_BEARER_TOKEN` 单值兼容 / `LCG_BEARER_TOKENS` 逗号分隔）；`lcg.identity` 提供 `ApiKey` → 租户 / 角色 / 操作人的内存映射与停用/最近使用记录，角色 `admin` / `operator` / `viewer` 仅作标签透传。仍没有用户注册 / 登录 / 密码哈希、按角色的接口权限拦截、Key 签发轮换；`lcg.tenant` 提供进程内存实现与可选本机 SQLite 后端，不做跨进程隔离。
 - **留痕为本地文件**：审计（`lcg.audit`）与反馈（`lcg.feedback`）默认关闭，启用后写本地 JSONL；配额 / 用量可选落本机 SQLite；无外置数据库、无远程汇聚。
 - **文本输入**：`lcg.ingest` / `lcg.sources` 归一上游 ASR / OCR / 字幕 / 表格产出的文本片段；本服务不做 ASR 语音识别、不做 OCR 图像识别。`lcg.sources` 定义了输入源协议与 `Recognizer` 识别适配器协议及内存桩，均不发起真实网络调用；真实识别后端由部署方接入。
 - **规则与代码同仓**：词库为仓库内 JSON，更新需随版本发布或重新部署；暂无在线热更新控制台。
@@ -58,10 +58,10 @@
 | 方向 | 现状基础 | 待补能力 |
 |---|---|---|
 | 多租户隔离 | `lcg.tenant` Tenant/配额骨架；内存或可选本机 SQLite；多共享 Key 与 Key→租户映射（请求级 calls 计数） | 租户身份、独立词库 / 插件包、数据与配置隔离、按租户配额 |
-| 账号与鉴权 | HTTP 多共享 Key 静态校验（Bearer 集合）；`LCG_KEY_TENANTS` 把 Key 映射到租户 | 用户/租户账号体系、API Key 签发与轮换、角色与权限、审计到人 |
+| 账号与鉴权 | HTTP 多共享 Key 静态校验（Bearer 集合）；`LCG_KEY_TENANTS` 把 Key 映射到租户；`lcg.identity` `ApiKey` → 租户/角色/操作人内存映射、停用与最近使用记录 | 用户/租户账号体系、注册登录与密码哈希、API Key 签发与轮换、按角色权限拦截、对接外部身份服务 |
 | 配额与计费 | `lcg.tenant` 配额扣减与用量快照；内存 + 可选本机 SQLite；HTTP 按映射 Key 记请求级 calls，停用/未注册返回 403、次数超额返回 429；pipeline 结束把 LLM token 回填到归属租户 | 超额 token 的强制拦截、外置持久化计量、对接账单与套餐；单价配置化 |
-| 存储 | 审计 / 反馈可选 JSONL 或本机 SQLite（按路径扩展名分流）；配额 / 用量可选本机 SQLite | 外置数据库或对象存储、留存策略、检索与导出、备份 |
-| 无状态与扩展 | 进程内缓存 / 预算 | 缓存与预算外置（Redis 等），支持多实例水平扩展 |
+| 存储 | 审计 / 反馈可选 JSONL 或本机 SQLite（按路径扩展名分流）；配额 / 用量可选本机 SQLite；`audit.query` / `feedback.query` 支持按行业 / 平台 / 类型 / 风险 / 操作人 / Key 过滤 | 外置数据库或对象存储、留存策略、跨进程共享、备份与归档 |
+| 无状态与扩展 | 进程内缓存 / 预算；`lcg.cache` `CacheStore` 协议与 `InMemoryCache`（可选 TTL，惰性过期） | 缓存与预算外置（Redis 等），实现 `CacheStore` 协议替换；支持多实例水平扩展 |
 | 规则运营 | 规则随版本发布；`rules/plugins/_*.json` 占位骨架 | 规则在线版本管理、灰度发布、命中反馈回流到规则评审流程 |
 | 输入接入 | `lcg.ingest` 归一契约；`lcg.sources` 输入源协议 + `Recognizer` 识别适配器协议与内存桩 | 对接真实 ASR / OCR 上游、实时字幕流；识别能力仍由外部服务承担 |
 

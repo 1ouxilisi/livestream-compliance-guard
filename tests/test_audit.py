@@ -102,3 +102,70 @@ def test_audit_sqlite_persists_across_reopen(tmp_path):
     audit.record(action="detect", result=RESULT, text=TEXT, path=db)
     ledger.close_all()
     assert len(audit.load_events(db)) == 1
+
+
+def _result(industry="general", action="detect", risk="high"):
+    return {**RESULT, "industry": industry, "platform": "douyin",
+            "risk_level": risk, "action": action}
+
+
+def test_audit_identity_fields_jsonl(tmp_path):
+    path = tmp_path / "audit.jsonl"
+    audit.record(action="detect", result=RESULT, text=TEXT, path=str(path),
+                 operator="u-1", key_id="sk-aa11")
+    events = audit.load_events(str(path))
+    assert events[0]["operator"] == "u-1"
+    assert events[0]["key_id"] == "sk-aa11"
+
+
+def test_audit_query_filters(tmp_path):
+    path = tmp_path / "audit.db"
+    audit.record(action="detect", result=_result("food", "detect", "high"),
+                 text=TEXT, path=str(path), operator="u-1", key_id="sk-1")
+    audit.record(action="rewrite", result=_result("food", "rewrite", "medium"),
+                 text=TEXT, path=str(path), operator="u-2", key_id="sk-2")
+    audit.record(action="detect", result=_result("cosmetics", "detect", "low"),
+                 text=TEXT, path=str(path), operator="u-1", key_id="sk-3")
+
+    assert len(audit.query(str(path))) == 3
+    assert len(audit.query(str(path), industry="food")) == 2
+    assert len(audit.query(str(path), action="detect")) == 2
+    assert len(audit.query(str(path), risk_level="medium")) == 1
+    assert len(audit.query(str(path), operator="u-1")) == 2
+    assert len(audit.query(str(path), key_id="sk-2")) == 1
+    assert len(audit.query(str(path), limit=2)) == 2
+    assert [e["key_id"] for e in audit.query(str(path), limit=2)] == ["sk-2", "sk-3"]
+
+
+def test_audit_query_since_filter(tmp_path):
+    path = tmp_path / "audit.jsonl"
+    audit.record(action="detect", result=RESULT, text=TEXT, path=str(path))
+    events = audit.load_events(str(path))
+    ts = events[0]["ts"]
+    assert audit.query(str(path), since=ts) == events
+    assert audit.query(str(path), since=ts + "Z") == []
+
+
+def test_audit_sqlite_legacy_columns_backfilled(tmp_path):
+    from lcg import ledger
+
+    db = str(tmp_path / "legacy.db")
+    conn = ledger.connect(db)
+    # 旧 schema：无 operator / key_id 列
+    conn.execute(
+        "CREATE TABLE audit_events ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, "
+        "action TEXT NOT NULL, industry TEXT NOT NULL DEFAULT '', "
+        "platform TEXT NOT NULL DEFAULT '', risk_level TEXT NOT NULL DEFAULT '', "
+        "mode TEXT NOT NULL DEFAULT 'rule', count INTEGER NOT NULL DEFAULT 0, "
+        "hits TEXT NOT NULL DEFAULT '[]', llm TEXT NOT NULL DEFAULT '{}', "
+        "text_len INTEGER, redacted INTEGER NOT NULL DEFAULT 0, text TEXT)"
+    )
+    conn.commit()
+    conn.close()
+
+    audit.record(action="detect", result=RESULT, text=TEXT, path=db,
+                 operator="u-9", key_id="sk-9")
+    events = audit.load_events(db)
+    assert events[0]["operator"] == "u-9"
+    assert events[0]["key_id"] == "sk-9"

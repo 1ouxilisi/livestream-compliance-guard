@@ -85,3 +85,19 @@ def test_feedback_sqlite_persists_across_reopen(tmp_path):
                     reported_risk="high", feedback="false_negative", path=db)
     ledger.close_all()
     assert len(feedback.load(db)) == 1
+
+
+def test_feedback_query_filters(tmp_path):
+    p = tmp_path / "f.jsonl"
+    feedback.submit(text="一", industry="food", platform="douyin", reported_risk="high",
+                    feedback="false_negative", category="功效", path=str(p))
+    feedback.submit(text="二", industry="food", platform="taobao", reported_risk="clean",
+                    feedback="review", category="误报", path=str(p))
+    feedback.submit(text="三", industry="general", platform="douyin", reported_risk="clean",
+                    feedback="false_positive", category="误报", path=str(p))
+    rows = feedback.load(str(p))
+    assert len(feedback.query(rows)) == 3
+    assert len(feedback.query(rows, feedback="review")) == 1
+    assert len(feedback.query(rows, industry="food")) == 2
+    assert len(feedback.query(rows, platform="douyin")) == 2
+    assert len(feedback.query(rows, category="误报")) == 2

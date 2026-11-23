@@ -91,3 +91,16 @@ def test_meter_check_exceeded_calls():
     meter.store.register(Tenant(id="t1", name="一号", quota_calls=2))
     assert meter.record("t1", calls=2) is True
     assert meter.check("t1", calls=1) == (False, "quota_exceeded")
+
+
+def test_meter_check_exceeded_tokens():
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t1", name="一号", quota_tokens=100))
+    assert meter.record("t1", calls=1, tokens=100) is True
+    assert meter.check("t1", calls=1, tokens=1) == (False, "token_exceeded")
+
+
+def test_meter_check_tokens_zero_means_unlimited():
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="t1", name="一号", quota_tokens=0))
+    assert meter.check("t1", calls=1, tokens=99999) == (True, "ok")

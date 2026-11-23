@@ -4,6 +4,24 @@
 
 规则库内容版本见 `rules/rules.v1.json` 的 `meta.version`（核心包当前 **v1.4**），与软件包版本相互独立；行业插件包在 `rules/plugins/*.json` 各自维护版本。
 
+## [0.7.8] - 2026-11-23
+
+平台化骨架补齐：身份/Key 内存映射、审计到人字段、审计/反馈检索过滤、可插拔缓存协议；配额预检增加 token 维度。判定 API 与规则结论向后兼容，默认行为不变。
+
+### 新增
+- **身份骨架** `lcg.identity`：`ApiKey` / `ResolvedIdentity` 与 `IdentityStore` 协议、`InMemoryIdentityStore` 线程安全实现；角色 `admin` / `operator` / `viewer` 仅作标签透传，非法角色登记时抛 `ValueError`。
+- **审计到人**：审计事件增加 `operator` / `key_id` 字段；HTTP 鉴权通过后把访问 Key 写入请求上下文并随检测/改写事件落库；SQLite 旧库自动补列。
+- **审计 / 反馈检索**：`audit.query(...)` 按行业 / 平台 / 动作 / 风险等级 / 操作人 / Key / 起始时间 / 条数过滤；`feedback.query(...)` 按反馈类型 / 行业 / 平台 / 类别过滤。
+- **缓存协议** `lcg.cache`：`CacheStore` 协议与 `InMemoryCache`（可选 TTL，访问时惰性过期）；外置 Redis / KV 由部署方实现协议替换。
+- **token 配额预检**：`UsageMeter.check` 增加 `tokens` 维度，预估 token 超额返回 `token_exceeded`，HTTP 层按 `429` 处理。
+
+### 边界（仍未实现）
+- 账号注册 / 登录 / 密码哈希、按角色的接口权限拦截、Key 签发与轮换、对接外部身份服务；身份仍为单进程内存骨架，重启清空、不跨进程共享。
+- 外置 DB / Redis / 对象存储、多实例水平扩展；真实 ASR / OCR 接入凭证、生产部署 / 域名 / TLS / 支付 / SLA、法条逐条法务复核与资质核验，均属外部依赖，不在本仓库内闭环。
+
+### 回归
+- ruff 全仓通过、pytest **198 项**全绿、规则评测 **75/75**（高危检出 100%、干净误报 0%）；软件包版本升至 **0.7.8**（核心规则库 v1.4，行业插件 v1.0）。
+
 ## [0.7.7] - 2026-11-23
 
 平台化计量与留痕补强：token 用量回填配额、超额/停用请求拦截、审计/反馈可选 SQLite 后端；运行时判定 API 与规则结论向后兼容，默认行为不变。

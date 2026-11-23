@@ -105,16 +105,18 @@ class UsageMeter:
     def record(self, tenant_id: str, calls: int = 0, tokens: int = 0) -> bool:
         return self.store.consume(tenant_id, calls=calls, tokens=tokens)
 
-    def check(self, tenant_id: str, calls: int = 1) -> tuple[bool, str]:
+    def check(self, tenant_id: str, calls: int = 1,
+              tokens: int = 0) -> tuple[bool, str]:
         """放行前预检：未注册 / 停用 / 调用次数超额返回 ``(False, reason)``。
 
         - ``unknown_tenant``：Key 映射到的租户未在配额表注册；
         - ``tenant_disabled``：租户被停用；
-        - ``quota_exceeded``：剩余调用次数不足。
+        - ``quota_exceeded``：剩余调用次数不足；
+        - ``token_exceeded``：预估 token 超出 token 配额（调用前未知时不传 ``tokens``）。
 
-        token 用量在请求前不可知，不在此预检；超额/停用的请求拦截只看调用次数。
-        预检不扣减，扣减由 ``record`` 完成；存储异常不抛错，按放行处理（避免存储故障
-        阻断全部流量），原因记为 ``store_error``。
+        token 在请求前通常不可知，HTTP 入口只按 calls 预检；token 属软计量——回填时
+        超额只不累计，不阻断已放行请求。预检不扣减，扣减由 ``record`` 完成；存储异常
+        不抛错，按放行处理（避免存储故障阻断全部流量），原因记为 ``store_error``。
         """
         try:
             tenant = self.store.get(tenant_id)
@@ -125,6 +127,9 @@ class UsageMeter:
             usage = self.store.usage(tenant_id)
             if tenant.quota_calls > 0 and usage.calls + calls > tenant.quota_calls:
                 return False, "quota_exceeded"
+            if tokens > 0 and tenant.quota_tokens > 0 \
+                    and usage.tokens + tokens > tenant.quota_tokens:
+                return False, "token_exceeded"
         except Exception:
             return True, "store_error"
         return True, "ok"
