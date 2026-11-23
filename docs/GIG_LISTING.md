@@ -28,14 +28,14 @@ A deterministic, auditable rule core with an optional LLM layer that checks scri
 - **Safe rewrite** (`safe_rewrite` / `rewrite_smart`): rule-based replacement with recheck; optional LLM natural full-sentence rewrite, re-checked by rules before adoption.
 - **Semantic fusion** (`scan_smart`): optional LLM supplements homophone / split-character / emoji / near-synonym evasion; returns mode and per-hit source; auto-falls back to rules-only on missing key, timeout, budget cap or dirty output.
 - **Normalization**: full-width/half-width, case, traditional→simplified, space/middle-dot/emoji blockers; ordinal disambiguation for "first".
-- **Governance artifacts**: input adaptation for heterogeneous ASR/subtitle segments, batch aggregation, local feedback log (false positive/negative/review) with CSV export, optional redactable audit trail, token usage with cost estimate. Pluggable input-source protocol and in-memory quota/usage skeleton are included as scaffolding only (no persistence, no auth, no cross-process sharing).
+- **Governance artifacts**: input adaptation for heterogeneous ASR/subtitle segments, batch aggregation, local feedback log (false positive/negative/review) with CSV export, optional redactable audit trail, token usage with cost estimate. Pluggable input-source protocol, in-memory quota/usage and identity/key mapping skeletons are included as scaffolding only (single-process memory; no signup/login, password hash, role-based access enforcement, external persistence or cross-process sharing).
 - **Transports**: stdio MCP and remote Streamable HTTP MCP (healthz probe, optional Bearer token).
-- **Pluggable lexicons**: built-in jadeite; external food/health-food and cosmetics plugins; new industry packs added via a template.
+- **Pluggable lexicons**: built-in general + jadeite; food/health-food and cosmetics as pluggable plugins; new industry packs added via a template. Rule source and review status tracked in `docs/COMPLIANCE_MAPPING.md`.
 
 ### Covered today
 - Platforms: Douyin, Kuaishou, WeChat Channels shop, Taobao Live.
 - Industries: general, jadeite, food/health-food, cosmetics.
-- Rule layer: 75 offline cases, 100% pass (100% high-risk recall, 0% clean false positives); 146 unit tests; aggregated 20 rules / 31 replacements.
+- Rule layer: 75 offline cases, 100% pass (100% high-risk recall, 0% clean false positives); 198 unit tests; aggregated 20 rules / 31 replacements.
 - Online LLM snapshot: 40/40 historical (results fluctuate with model version and balance; latest snapshot in `reports/LLM_EVAL.md`).
 
 ## 4. Deliverable tiers (structure only — price TBD)
@@ -61,8 +61,9 @@ A deterministic, auditable rule core with an optional LLM layer that checks scri
 - Risk advisory and rewrite suggestions only; **not legal advice**, not a platform audit decision, no endorsement of product authenticity or qualifications.
 - Does not verify license/filing/certificate authenticity; does not perform ASR (speech) or OCR (image) recognition.
 - High-risk hits must be reviewed by a human before going live.
-- Not covered yet: medical devices, education, finance, insurance, alcohol, cross-border/imported goods, English/TikTok Shop/Amazon Live rules.
+- Not covered yet: medical devices, finance/insurance, education, alcohol, cross-border/imported goods, English/TikTok Shop/Amazon Live rules; these exist only as placeholder skeletons with no real word lexicon. Identity, quota, audit and cache are in-process memory skeletons, not a production multi-tenant account system.
 - Rule layer has inherent false negatives/positives; online results fluctuate with model version and account balance.
+- Capability split for listing copy: see `docs/CAPABILITY_TIERS.md` (A: sellable; B: skeleton/optional; C: not promised).
 
 ## 7. Engagement terms
 
