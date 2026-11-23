@@ -1,4 +1,4 @@
-# Tool I/O Schema · 直播电商合规守卫 MCP（软件 v0.5.0 / 核心规则 v1.3 ＋ 行业插件 v1.0）
+# Tool I/O Schema · 直播电商合规守卫 MCP（软件 v0.7.0 / 核心规则 v1.4 ＋ 行业插件 v1.0）
 
 传输：stdio（`python server.py`）或 Streamable HTTP（`python -m lcg.server_http`，MCP 端点 `/mcp`、健康检查 `/healthz`、可选 `Authorization: Bearer <LCG_BEARER_TOKEN>`，详见 `examples/mcp-client.http.md`）。两种传输暴露同一组 6 个工具：4 个纯规则确定性工具（scan_text / scan_livestream / compliance_rules / safe_rewrite）与 2 个规则＋LLM 融合工具（scan_smart / rewrite_smart）。
 
@@ -27,8 +27,8 @@
   "disclaimer": "仅为合规风险提示，不构成法律意见，以监管机关与平台最新规则为准。" }
 ```
 
-## 2. scan_livestream(messages, industry, platform)
-整场直播逐句批量检测与聚合。`messages = [{ "speaker": "主播", "text": "..." }]`（按时间序）。
+## 2. scan_livestream(transcript, industry, platform)
+整场直播逐句批量检测与聚合。`transcript = [{ "seq": 0, "speaker": "主播", "text": "..." }]`（按时间序）。
 ```json
 // ->
 { "overall_risk": "high", "segments": 20, "flagged_segments": 6, "high_risk_hits": 9,
@@ -62,7 +62,7 @@
 // ->（成功融合）
 { "risk_level": "high", "clean": false, "count": 3, "hits": [ Hit(rule…), Hit(llm…) ],
   "industry": "general", "platform": "douyin", "mode": "rules_plus_llm",
-  "llm": { "status": "ok", "model": "…", "prompt_version": "detect-v1",
+  "llm": { "status": "ok", "model": "…", "prompt_version": "detect-v3",
            "rewrite_prompt_version": "rewrite-v1", "cached": false, "calls": 1, "error": "" },
   "disclaimer": "…" }
 // ->（降级，结果与 scan_text 一致）

@@ -14,15 +14,17 @@ Use this skill when you need to:
 
 ## Inputs
 - `text` (string): the line or copy to check.
-- `industry` (string): `jadeite` (翡翠/玉石, default, richest lexicon) or `general`.
+- `industry` (string): `jadeite` (翡翠/玉石, richest built-in lexicon), `food` (食品/保健食品), `cosmetics` (化妆品), or `general` (综合). Rule-only tools default to `jadeite`; smart LLM tools default to `general`.
 - `platform` (string): `douyin` | `kuaishou` | `shipinhao` (视频号) | `taobao` (淘宝直播).
-- For batch: `messages` = list of `{"speaker": string, "text": string}` in timeline order.
+- For batch: `transcript` = list of `{"seq": number, "speaker": string, "text": string}` in timeline order.
 
 ## Tools
-1. `scan_text(text, industry, platform)` → single-line verdict.
-2. `scan_livestream(messages, industry, platform)` → whole-session timeline + counts.
-3. `compliance_rules(industry, platform)` → active lexicon for display/training/audit.
-4. `safe_rewrite(text, industry, platform)` → matched terms and safer replacements.
+1. `scan_text(text, industry, platform)` → single-line deterministic verdict.
+2. `scan_livestream(transcript, industry, platform)` → whole-session timeline + counts.
+3. `compliance_rules(industry, platform)` → active lexicon and rule version for display/training/audit.
+4. `safe_rewrite(text, industry, platform)` → matched terms, safer replacements, rewrite + re-check.
+5. `scan_smart(text, industry, platform, use_llm)` → rule floor + optional LLM semantic fusion for homophones / split chars / emoji / implied hints; degrades to rules-only if no key or on error.
+6. `rewrite_smart(text, industry, platform, use_llm)` → LLM natural rewrite keeping selling points, re-checked by rules; falls back to rule replacement on failure.
 
 ## Output schema
 ```json
@@ -60,4 +62,4 @@ Use this skill when you need to:
 - Advisory only; the final decision rests with the merchant and the latest official/platform rules. Not legal advice.
 
 ## Version
-v1.0 (2026-10) · rule-based core · jadeite + general · 4 platforms · MCP/SKILL packaging.
+v0.7.0 (2026-11) · rule core v1.4 + optional LLM layer · jadeite / general / food / cosmetics · 4 platforms · 6 MCP tools · stdio + HTTP transport.

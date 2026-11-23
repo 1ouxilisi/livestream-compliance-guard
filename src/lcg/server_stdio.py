@@ -35,7 +35,7 @@ def create_mcp() -> FastMCP:
     @mcp.tool()
     def scan_text(
         text: str,
-        industry: Literal["jadeite", "general"] = "jadeite",
+        industry: Literal["jadeite", "general", "food", "cosmetics"] = "jadeite",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
         """扫描单条直播/短视频文本，返回风险等级、命中明细与处置建议。"""
@@ -44,7 +44,7 @@ def create_mcp() -> FastMCP:
     @mcp.tool()
     def scan_livestream(
         transcript: List[Dict[str, str]],
-        industry: Literal["jadeite", "general"] = "jadeite",
+        industry: Literal["jadeite", "general", "food", "cosmetics"] = "jadeite",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
         """扫描整场直播逐句文本。transcript 为 [{seq, speaker, text}, ...]。"""
@@ -52,7 +52,7 @@ def create_mcp() -> FastMCP:
 
     @mcp.tool()
     def compliance_rules(
-        industry: Literal["jadeite", "general"] = "jadeite",
+        industry: Literal["jadeite", "general", "food", "cosmetics"] = "jadeite",
         platform: Optional[Literal["douyin", "kuaishou", "shipinhao", "taobao"]] = None,
     ) -> Dict[str, Any]:
         """返回当前生效的合规规则与规则库版本，供客户端展示/同步。"""
@@ -61,7 +61,7 @@ def create_mcp() -> FastMCP:
     @mcp.tool()
     def safe_rewrite(
         text: str,
-        industry: Literal["jadeite", "general"] = "jadeite",
+        industry: Literal["jadeite", "general", "food", "cosmetics"] = "jadeite",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
         """对命中词给出替换建议、改写全文并复检风险；正式话术请人工复核。"""
@@ -70,7 +70,7 @@ def create_mcp() -> FastMCP:
     @mcp.tool()
     def scan_smart(
         text: str,
-        industry: Literal["jadeite", "general"] = "general",
+        industry: Literal["jadeite", "general", "food", "cosmetics"] = "general",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
         use_llm: bool = True,
     ) -> Dict[str, Any]:
@@ -84,7 +84,7 @@ def create_mcp() -> FastMCP:
     @mcp.tool()
     def rewrite_smart(
         text: str,
-        industry: Literal["jadeite", "general"] = "general",
+        industry: Literal["jadeite", "general", "food", "cosmetics"] = "general",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
         use_llm: bool = True,
     ) -> Dict[str, Any]:

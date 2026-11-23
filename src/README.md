@@ -26,7 +26,7 @@ src/lcg/
 1. `rules_store` 直接加载 JSON 并做结构/计数校验；`active_rules` 按 scope 过滤。
 2. `engine` 承接全部判定，输出字段与旧单文件版逐字一致。
 3. 根 `server.py` 退化为 shim，`server.detect is lcg.engine.detect`；`tests/run_baseline.py` 与 `evals/run_evals.py` 保持全绿，另增 pytest 21 项直接覆盖 `lcg.*`。
-4. `server_stdio` 提供 4 个 MCP 工具（scan_text / scan_livestream / compliance_rules / safe_rewrite）。
+4. `server_stdio` 初始提供 4 个 MCP 工具（scan_text / scan_livestream / compliance_rules / safe_rewrite）；v0.3.0 起增至 6 个（另加 scan_smart / rewrite_smart），详见 `docs/TOOL_SCHEMA.md`。
 5. `scripts/export_rules.py` 反转为 JSON 规范化 + `--check` 一致性守门。
 
 ## 已完成（v0.2.0 增量）
