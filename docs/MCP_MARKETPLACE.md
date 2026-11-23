@@ -17,7 +17,7 @@
 
 | 材料 | 现状 | 说明 |
 |---|---|---|
-| 仓库公开访问 | 发布前需设为 Public | 市场与用户需能匿名访问源码、LICENSE 与文档 |
+| 仓库公开访问 | 已 Public（发布前复核匿名可访问） | 市场与用户需能匿名访问源码、LICENSE 与文档 |
 | README（英文 + 中文） | 已有 | 含工具列表、快速开始、能力边界与免责声明 |
 | LICENSE | 已有（MIT，署名 1ouxilisi） | 市场元信息需与之一致 |
 | 包元信息 | `pyproject.toml`：name/version/description/keywords/license/authors | 检索关键词已补 |
@@ -29,7 +29,7 @@
 
 ## 3. 发布前检查清单
 
-- [ ] 仓库改为 Public，匿名可访问。
+- [x] 仓库已 Public；发布前复核匿名可访问（匿名 API / raw README 200）。
 - [ ] 回归全绿：`pytest -q`、`evals/run_evals.py`、`ruff check`、`export_rules.py --check`。
 - [ ] 在线 LLM 评测快照为最新（`reports/LLM_EVAL.md`），或明确标注离线规则层成绩。
 - [ ] 确认 `.env` / 密钥 / 内部台账未入库（`.gitignore` 已排除 `.env`、`*上架物料包*.md` 等）。
@@ -42,7 +42,7 @@
 1. **官方 MCP server 列表 / 目录**：向 MCP 官方生态的 servers 仓库或目录提交条目（名称、一句话描述、仓库地址、传输方式、运行时要求）；具体提交模板与分类以官方仓库当前 CONTRIBUTING 为准。
 2. **客户端市场 / 插件市场**：Cursor、VS Code、Claude 等客户端各自的 MCP / 插件发现渠道，按其表单填写。
 3. **包索引**：若发布 Python wheel，按包索引上传流程提交；描述与关键词沿用 `pyproject.toml`。
-4. **社区渠道**：技术社群、独立开发者目录、内容帖子引流到仓库。
+4. **开源公开露出**：仓库与公开文档作为能力展示；任何定制承接均通过 Fiverr / Upwork 等第三方外包平台站内沟通与交易，不在站外主动私信、社群拉客或转介绍。
 
 > 提交条目建议字段：`name`、`description`（一句话中文/英文）、`keywords`、`repository`、`license`、`runtime`（Python ≥3.10）、`transport`（stdio / HTTP）、`optional`（LLM 层需 key）。
 
@@ -50,7 +50,7 @@
 
 | 待办项 | 说明 | 解除方式 |
 |---|---|---|
-| 仓库可见性 | 若仍为 Private，匿名 API 访问 404，市场无法引用 | 仓库 Settings → General → Danger Zone 改为 Public；或由具备 repo 权限的 token 通过 API 切换 |
+| 仓库可见性 | 已切换 Public；若后续改回 Private，匿名 API 访问 404，市场无法引用 | 发布前复核 Settings → General → Danger Zone 可见性为 Public |
 | 无发布凭据 | 当前无 `GH_TOKEN` / PAT / SSH，`gh` CLI 未安装 | 由仓库所有者生成具备 repo 权限的 PAT，或在网页端操作 |
 | CI 徽章 | 仓库公开且 GitHub Actions 跑通后才显示 | 公开后推送触发 CI，确认 workflow 绿 |
 

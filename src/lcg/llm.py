@@ -114,17 +114,44 @@ class LLMConfig:
     # 单价（每百万 token，币种随 provider 账单；0 = 未配置，成本估算只报 token 量）
     price_input_per_mtok: float = 0.0
     price_output_per_mtok: float = 0.0
+    # 配置清洗时回退默认值的原因（可诊断，不影响运行）；非法 env 不会让服务崩溃
+    warnings: List[str] = field(default_factory=list)
 
     @classmethod
     def from_env(cls, env: Optional[Dict[str, str]] = None) -> "LLMConfig":
         e = env if env is not None else os.environ
+        warnings: List[str] = []
+
         provider = (e.get("LCG_LLM_PROVIDER") or "siliconflow").strip().lower()
-        key = (e.get("LCG_LLM_API_KEY") or "").strip()
         base = (e.get("LCG_LLM_BASE_URL") or "").strip()
+        # 未显式给自定义端点时，provider 必须落在已知白名单；否则回退 siliconflow 并记录。
+        if provider not in _PROVIDER_BASE_URLS and not base:
+            warnings.append(f"未知 provider={provider!r}，已回退 siliconflow")
+            provider = "siliconflow"
+
+        key = (e.get("LCG_LLM_API_KEY") or "").strip()
         if not key:
             key = (e.get(_PROVIDER_KEY_ENV.get(provider, "")) or "").strip()
         if not base:
             base = _PROVIDER_BASE_URLS.get(provider, "")
+
+        def _float(name: str, default: float) -> float:
+            try:
+                return float(str(e.get(name, default)).strip())
+            except (TypeError, ValueError):
+                return default
+
+        def _nonneg_float(name: str, default: float) -> float:
+            v = _float(name, default)
+            if v < 0:
+                warnings.append(f"{name}={v} 为负，已回退默认 {default}")
+                return default
+            return v
+
+        timeout = _float("LCG_LLM_TIMEOUT", 20.0)
+        if timeout <= 0:
+            warnings.append(f"LCG_LLM_TIMEOUT={timeout} 非法（须 >0），已回退 20.0")
+            timeout = 20.0
 
         def _int(name: str, default: int) -> int:
             try:
@@ -132,11 +159,10 @@ class LLMConfig:
             except (TypeError, ValueError):
                 return default
 
-        def _float(name: str, default: float) -> float:
-            try:
-                return float(str(e.get(name, default)).strip())
-            except (TypeError, ValueError):
-                return default
+        max_calls = _int("LCG_LLM_MAX_CALLS", 200)
+        if max_calls < 0:
+            warnings.append(f"LCG_LLM_MAX_CALLS={max_calls} 为负，已回退 200")
+            max_calls = 200
 
         enabled = (e.get("LCG_LLM_ENABLED", "1").strip().lower()
                    not in ("0", "false", "no", "off"))
@@ -147,10 +173,11 @@ class LLMConfig:
             model_fallback=(e.get("LCG_MODEL_FALLBACK") or "").strip(),
             base_url=base,
             api_key=key,
-            timeout=_float("LCG_LLM_TIMEOUT", 20.0),
-            max_calls=_int("LCG_LLM_MAX_CALLS", 200),
-            price_input_per_mtok=_float("LCG_PRICE_INPUT_PER_MTOK", 0.0),
-            price_output_per_mtok=_float("LCG_PRICE_OUTPUT_PER_MTOK", 0.0),
+            timeout=timeout,
+            max_calls=max_calls,
+            price_input_per_mtok=_nonneg_float("LCG_PRICE_INPUT_PER_MTOK", 0.0),
+            price_output_per_mtok=_nonneg_float("LCG_PRICE_OUTPUT_PER_MTOK", 0.0),
+            warnings=warnings,
         )
 
 

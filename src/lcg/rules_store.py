@@ -99,7 +99,9 @@ def validate_plugin(data: Dict[str, Any], where: str) -> None:
 def plugin_paths() -> List[Path]:
     if not PLUGINS_DIR.exists():
         return []
-    return sorted(p for p in PLUGINS_DIR.glob("*.json") if p.is_file())
+    # 下划线前缀文件（如 _template.json）视为模板/占位，不参与聚合加载与校验
+    return sorted(p for p in PLUGINS_DIR.glob("*.json")
+                  if p.is_file() and not p.name.startswith("_"))
 
 
 @lru_cache(maxsize=1)

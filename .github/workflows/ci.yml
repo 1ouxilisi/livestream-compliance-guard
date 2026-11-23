@@ -7,7 +7,7 @@ on:
 
 jobs:
   rules-and-evals:
-    name: Rules sync · baseline · pytest · evals
+    name: Rules sync · lint · baseline · pytest · wheel · evals
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,8 +28,32 @@ jobs:
       - name: Install dev dependencies
         run: python -m pip install -r requirements-dev.txt
 
+      - name: Ruff static checks
+        run: python -m ruff check src tests scripts server.py
+
       - name: pytest unit tests
         run: python -m pytest -q
+
+      # 打包守门：构建 wheel 并解包断言规则词库随包打入，防止独立安装后引擎加载空词库
+      - name: Build wheel and verify rule lexicon bundled
+        run: |
+          python -m pip install build
+          python -m build --wheel
+          python - <<'PY'
+          import glob, sys, zipfile
+          whl = glob.glob('dist/*.whl')[0]
+          names = zipfile.ZipFile(whl).namelist()
+          required = [
+              "lcg/rules/rules.v1.json",
+              "lcg/rules/plugins/food.json",
+              "lcg/rules/plugins/cosmetics.json",
+          ]
+          missing = [r for r in required if r not in names]
+          if missing:
+              print("MISSING in wheel:", missing)
+              sys.exit(1)
+          print("wheel OK, rule lexicon bundled:", ", ".join(required))
+          PY
 
       - name: Eval suite (regenerate BENCHMARK)
         run: python evals/run_evals.py

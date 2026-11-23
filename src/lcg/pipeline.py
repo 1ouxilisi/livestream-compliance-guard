@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from . import engine, rules_store
+from . import audit, engine, rules_store
 from .llm import PROMPT_VERSION, REWRITE_PROMPT_VERSION, LLMConfig, LLMFinding, LLMJudge
 from .models import SEV_ORDER, normalize_text, validate_context
 
@@ -121,7 +121,7 @@ def analyze(text: str, industry: str = "general", platform: str = "douyin", *,
         # status 非 ok：保持纯规则结果，mode 维持 rules_only，原因见 meta["status"]
 
     hits.sort(key=lambda h: -SEV_ORDER[h["severity"]])
-    return {
+    res = {
         "risk_level": level,
         "clean": level == "clean",
         "count": len(hits),
@@ -132,6 +132,8 @@ def analyze(text: str, industry: str = "general", platform: str = "douyin", *,
         "llm": meta,
         "disclaimer": _DISCLAIMER,
     }
+    audit.record(action="detect", result=res, text=orig)
+    return res
 
 
 def smart_rewrite(text: str, industry: str = "general", platform: str = "douyin", *,
@@ -183,6 +185,9 @@ def smart_rewrite(text: str, industry: str = "general", platform: str = "douyin"
         "rewritten_risk": recheck["risk_level"],
         "rewritten_clean": recheck["clean"],
         "needs_human_review": rewrite_mode == "llm_rejected_needs_review",
+        "industry": industry,
+        "platform": platform,
         "llm": meta,
     })
+    audit.record(action="rewrite", result=out, text=orig)
     return out

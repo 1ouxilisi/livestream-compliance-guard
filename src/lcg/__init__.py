@@ -9,6 +9,10 @@ lcg —— livestream-compliance-guard 规则引擎包（能力标准件 ①）�
   engine.py        检测 / 批量聚合 / 改写 / 规则查询（纯逻辑，零依赖；规则硬底线）
   llm.py           LLM 语义层客户端（OpenAI 兼容，可选依赖；无 key/故障可降级）
   pipeline.py      规则硬底线＋LLM 融合编排（analyze / smart_rewrite）
+  ingest.py        异构 ASR/字幕片段归一为 scan_batch 契约（不做 ASR/OCR）
+  aggregator.py    整场结果分布/类别/主播聚合与待整改清单（纯统计）
+  feedback.py      误报/漏报/存疑本地 JSONL 记录与 CSV 导出（可选启用）
+  audit.py         可选本地 JSONL 审计留痕（默认关闭、可脱敏；零依赖）
   server_stdio.py  FastMCP stdio 入口（依赖 mcp）
   server_http.py   Streamable HTTP + Bearer 鉴权入口（依赖 mcp/uvicorn）
 
@@ -31,7 +35,7 @@ from .rules_store import (
     replacements,
 )
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 
 __all__ = [
     "__version__",

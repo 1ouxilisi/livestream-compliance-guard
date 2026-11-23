@@ -14,10 +14,10 @@ semantic 是谐音/拆字/emoji/暗示等规则层必然漏检、需 LLM 语义�
 运行：python evals/run_evals.py
 """
 from __future__ import annotations
-import sys
-import json
-import importlib.util
+
 import datetime
+import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -123,14 +123,16 @@ def main() -> int:
         f"# BENCHMARK · 直播电商合规守卫 MCP（规则层 {_rules_title()}）",
         "",
         f"- 生成日期：{today}",
-        f"- 评测对象：`lcg` 规则引擎（src/lcg；规则源为核心包 rules.v1.json ＋ rules/plugins/*.json 行业插件；根 server.py 为兼容 shim）",
+        "- 评测对象：`lcg` 规则引擎（src/lcg；规则源为核心包 rules.v1.json ＋ "
+        "rules/plugins/*.json 行业插件；根 server.py 为兼容 shim）",
         f"- 规则层用例：{total} 条（良性 {sum(1 for x in rows if x['kind']=='benign')}，"
         f"对抗 {sum(1 for x in rows if x['kind']=='adversarial')}）",
         f"- **整体通过率：{pass_rate:.1%}**（{n_pass}/{total}）",
         f"- **高危样本检出率：{detect_rate:.1%}**（{hi_ok}/{hi_total}）",
         f"- **干净样本误报率：{fp_rate:.1%}**（{clean_fp}/{clean_total}，越低越好）",
         f"- LLM 层红队用例：{redteam_n} 条（注入/越狱，交由 DeepTeam·PyRIT 在 LLM 层裁决）",
-        f"- 语义层待跑用例：{semantic_n} 条（谐音/拆字/emoji/暗示，规则层已确认漏检，配 key 后由 LLM 层裁决）",
+        f"- 语义层待跑用例：{semantic_n} 条（谐音/拆字/emoji/暗示，"
+        "规则层已确认漏检，配 key 后由 LLM 层裁决）",
         "",
         "| ID | 类型 | 期望 | 实际 | 结果 | 命中数 | 备注 |",
         "|---|---|---|---|---|---|---|",
@@ -145,7 +147,7 @@ def main() -> int:
         "",
     ]
     (REPORTS_DIR / "BENCHMARK.md").write_text("\n".join(lines), encoding="utf-8")
-    print(f"[OK] 已写出 reports/BENCHMARK.md")
+    print("[OK] 已写出 reports/BENCHMARK.md")
 
     if n_fail:
         print("[FAIL] 存在未通过用例，请检查规则或评测期望。")

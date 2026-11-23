@@ -4,6 +4,27 @@
 
 规则库内容版本见 `rules/rules.v1.json` 的 `meta.version`（核心包当前 **v1.4**），与软件包版本相互独立；行业插件包在 `rules/plugins/*.json` 各自维护版本。
 
+## [0.7.2] - 2026-11-23
+
+演示走查脚本、录屏分镜文档、治理层底层件与 CI 守门补齐；运行时判定 API 与规则结论不变。
+
+### 新增
+- **离线演示脚本** `scripts/demo_walkthrough.py`：分 9 节走查合规放行、高危拦截、变体绕过、行业插件、整场批量、批量聚合/输入适配/反馈闭环/审计事件、改写闭环、LLM 融合/降级、性能快照；支持 `--offline`（强制纯规则、不耗额度）与 `--json`（结构化输出），零第三方依赖、离线可跑。
+- **录屏分镜与口播脚本** `docs/DEMO_SCRIPT.md`：开场到收尾逐镜的命令、屏幕预期、中文口播与 English voiceover，附录制前准备、剪辑上架口径红线与复现命令清单。
+- **输入适配** `src/lcg/ingest.py`：把上游 ASR/字幕/表格的异构片段（dict/list/tuple/str）归一为 `scan_batch` 契约；本服务不做 ASR/OCR，只消费已转写文本，空片段丢弃、seq 缺省重排。
+- **整场聚合** `src/lcg/aggregator.py`：对批量结果做风险等级分布、命中类别、按主播最高风险/分段数/high 命中数与待整改清单统计；只归类不改判定结论。
+- **反馈闭环** `src/lcg/feedback.py`：误报/漏报/存疑记录到本地 JSONL（`LCG_FEEDBACK_LOG`，未配置则禁用），支持读回与 UTF-8 BOM CSV 导出，作为规则迭代与评测扩充输入。
+- **本地审计留痕** `src/lcg/audit.py`：可选 JSONL 事件落盘（`LCG_AUDIT_LOG`），默认关闭；`LCG_AUDIT_REDACT=1` 时不写原始话术、仅留长度与截断命中片段；写盘异常不影响主流程。
+- **行业插件模板** `rules/plugins/_template.json`：下划线前缀文件视为模板/占位，不参与聚合加载与校验；新增插件流程见 `CONTRIBUTING.md`。
+- **部署与平台化演进文档** `docs/DEPLOYMENT.md`：梳理当前单租户自托管边界、配置项速查、生产部署建议，以及多租户/鉴权/配额计费/存储/无状态化等尚未实现的演进方向，避免把路线图当成现有功能。
+
+### 变更
+- **LLM 配置清洗加固**：未知 provider 回退 siliconflow 并记录；非法超时、负调用预算、负单价回退默认值，原因写入 `config.warnings`，非法 env 不导致服务崩溃。
+- `rules_store` 跳过下划线前缀插件文件；`CONTRIBUTING.md` 补充新增行业插件的完整流程。
+- CI 增加 Ruff 静态检查与 wheel 打包守门（构建后解包断言规则词库随包打入，防止独立安装后加载空词库）。
+- 清理 `evals/run_evals.py` 历史 lint：import 排序、移除未用导入、去除冗余 f 前缀、长行折行。
+- 回归：ruff 全仓通过、pytest **123 项**全绿、规则评测 **72/72**；软件包版本升至 **0.7.2**（核心规则库 v1.4，行业插件 v1.0）。
+
 ## [0.7.1] - 2026-11-23
 
 LLM token usage 计量落地、规则评测集扩充、成本基准口径刷新。规则核心判定与对外 API 向后兼容。

@@ -37,6 +37,16 @@ python server.py --selftest             # 端到端自测
 5. 若改变判定行为，在 `rules.v1.json` 提升 `meta.version` 并在 `CHANGELOG.md` 记录；
 6. 跑完全部本地验证再提交。
 
+## 新增一个行业插件
+
+1. 复制 `rules/plugins/_template.json` 为 `rules/plugins/<industry>.json`（下划线前缀文件是模板，不被加载）；
+2. 把 `meta.package` / `meta.industry` 与每条规则的 `scope` 改为 `industry:<industry>`；
+3. 词条与正则须有可溯源法条/平台规则（写入 `meta.sources` 与 `law`）；医疗、金融、教培、酒水等强监管行业上线前须经法务复核；
+4. 在 `src/lcg/models.py` 的 `INDUSTRIES` 注册新行业，并同步 `src/lcg/server_stdio.py` 各工具签名的 `industry` Literal；
+5. 运行 `python scripts/export_rules.py` 规范化写回；在 `evals/cases/` 补该行业的命中用例与良性防误报用例；
+6. 跑完全部本地验证再提交。
+
+
 ## 代码约定
 
 - Python ≥ 3.10，行宽 100，提交前尽量通过 `ruff check .`（规则见 pyproject）；
