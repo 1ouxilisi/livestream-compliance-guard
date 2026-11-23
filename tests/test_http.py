@@ -11,9 +11,9 @@ uvicorn = pytest.importorskip("uvicorn")
 from lcg import server_http  # noqa: E402
 
 
-async def _serve(token):
+async def _serve(token, meter=None, key_tenants=None):
     config = uvicorn.Config(
-        server_http.build_app(token=token),
+        server_http.build_app(token=token, meter=meter, key_tenants=key_tenants),
         host="127.0.0.1", port=0, log_level="critical")
     server = uvicorn.Server(config)
     task = asyncio.create_task(server.serve())
@@ -95,6 +95,49 @@ def test_parse_tokens_explicit_and_env(monkeypatch):
     monkeypatch.setenv("LCG_BEARER_TOKEN", "single")
     monkeypatch.setenv("LCG_BEARER_TOKENS", "k1, k2")
     assert server_http._parse_tokens(None) == {"single", "k1", "k2"}
+
+
+def test_parse_key_tenants(monkeypatch):
+    monkeypatch.delenv("LCG_KEY_TENANTS", raising=False)
+    parsed = server_http._parse_key_tenants("k1=tenant_a, k2 = tenant_b , bad,,=x")
+    assert parsed == {"k1": "tenant_a", "k2": "tenant_b"}
+    monkeypatch.setenv("LCG_KEY_TENANTS", "envk=envtenant")
+    assert server_http._parse_key_tenants(None) == {"envk": "envtenant"}
+
+
+@pytest.mark.asyncio
+async def test_meter_records_mapped_tenant():
+    import httpx
+
+    from lcg.tenant import Tenant, UsageMeter
+
+    meter = UsageMeter()
+    meter.store.register(Tenant(id="tenant_a", name="甲"))
+    meter.store.register(Tenant(id="tenant_b", name="乙"))
+    mapping = {"ka": "tenant_a", "kb": "tenant_b"}
+
+    server, task, port = await _serve(["ka", "kb"], meter=meter, key_tenants=mapping)
+    try:
+        async with httpx.AsyncClient() as client:
+            # healthz 始终放行且不计费
+            await client.get(f"http://127.0.0.1:{port}/healthz")
+            # 映射 Key 放行并按 Key 记入对应租户
+            await client.post(f"http://127.0.0.1:{port}/mcp",
+                              headers={"Authorization": "Bearer ka"})
+            await client.post(f"http://127.0.0.1:{port}/mcp",
+                              headers={"Authorization": "Bearer kb"})
+            # 错误 Key 401，不计费
+            wrong = await client.post(
+                f"http://127.0.0.1:{port}/mcp",
+                headers={"Authorization": "Bearer nope"})
+            assert wrong.status_code == 401
+
+        snap = meter.snapshot()
+        assert snap["tenant_a"]["calls"] == 1
+        assert snap["tenant_b"]["calls"] == 1
+        assert set(snap) == {"tenant_a", "tenant_b"}
+    finally:
+        await _stop(server, task)
 
 
 @pytest.mark.asyncio

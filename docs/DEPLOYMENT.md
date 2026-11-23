@@ -33,6 +33,7 @@
 | `LCG_PRICE_INPUT_PER_MTOK` / `LCG_PRICE_OUTPUT_PER_MTOK` | 每百万 token 单价，用于成本估算；0 = 只报 token | `0` |
 | `LCG_BEARER_TOKEN` | HTTP 共享访问令牌（单值，向后兼容）；不设置则本地开放（仅限可信内网） | 空 |
 | `LCG_BEARER_TOKENS` | HTTP 多 Key，逗号分隔；与 `LCG_BEARER_TOKEN` 合并生效 | 空 |
+| `LCG_KEY_TENANTS` | Key→租户映射，逗号分隔 `key=tenant_id`；鉴权通过后按映射记请求级调用次数；未映射 Key 不计费 | 空（不映射） |
 | `LCG_STORE_DSN` | 配额 / 用量存储：空 = 进程内存；文件路径 = 本机 SQLite 落盘；`:memory:` = SQLite 内存库 | 空（内存） |
 | `LCG_HTTP_HOST` / `LCG_HTTP_PORT` | HTTP 监听地址 / 端口 | `0.0.0.0` / `8000` |
 | `LCG_AUDIT_LOG` | 审计 JSONL 路径；不设置则不落盘 | 空（关闭） |
@@ -56,9 +57,9 @@
 
 | 方向 | 现状基础 | 待补能力 |
 |---|---|---|
-| 多租户隔离 | `lcg.tenant` Tenant/配额骨架；内存或可选本机 SQLite；多共享 Key | 租户身份、独立词库 / 插件包、数据与配置隔离、按租户配额 |
-| 账号与鉴权 | HTTP 多共享 Key 静态校验（Bearer 集合） | 用户/租户账号体系、API Key 签发与轮换、角色与权限、审计到人 |
-| 配额与计费 | `lcg.tenant` 配额扣减与用量快照；内存 + 可选本机 SQLite；已有调用计数与 token usage 透传 | 外置持久化计量、对接账单与套餐；单价配置化 |
+| 多租户隔离 | `lcg.tenant` Tenant/配额骨架；内存或可选本机 SQLite；多共享 Key 与 Key→租户映射（请求级 calls 计数） | 租户身份、独立词库 / 插件包、数据与配置隔离、按租户配额 |
+| 账号与鉴权 | HTTP 多共享 Key 静态校验（Bearer 集合）；`LCG_KEY_TENANTS` 把 Key 映射到租户 | 用户/租户账号体系、API Key 签发与轮换、角色与权限、审计到人 |
+| 配额与计费 | `lcg.tenant` 配额扣减与用量快照；内存 + 可选本机 SQLite；HTTP 已按映射 Key 记请求级调用次数；LLM 层透传 token usage | 超额/停用的请求拦截、token 用量回填配额、外置持久化计量、对接账单与套餐；单价配置化 |
 | 存储 | 本地 JSONL（审计 / 反馈）；配额 / 用量可选本机 SQLite | 外置数据库或对象存储、留存策略、检索与导出、备份 |
 | 无状态与扩展 | 进程内缓存 / 预算 | 缓存与预算外置（Redis 等），支持多实例水平扩展 |
 | 规则运营 | 规则随版本发布；`rules/plugins/_*.json` 占位骨架 | 规则在线版本管理、灰度发布、命中反馈回流到规则评审流程 |
