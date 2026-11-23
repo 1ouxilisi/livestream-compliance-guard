@@ -46,7 +46,8 @@ def _blank_meta() -> Dict[str, Any]:
     return {"status": "disabled", "model": "",
             "prompt_version": PROMPT_VERSION,
             "rewrite_prompt_version": REWRITE_PROMPT_VERSION,
-            "cached": False, "calls": 0, "error": ""}
+            "cached": False, "calls": 0, "error": "",
+            "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
 
 
 def _categories(industry: str, platform: str):
@@ -104,7 +105,9 @@ def analyze(text: str, industry: str = "general", platform: str = "douyin", *,
         j = judge or _default_judge()
         jr = j.semantic_detect(orig, industry, platform, _categories(industry, platform))
         meta.update(status=jr.status, model=jr.model, cached=jr.cached,
-                    calls=jr.calls, error=jr.error, prompt_version=jr.prompt_version)
+                    calls=jr.calls, error=jr.error, prompt_version=jr.prompt_version,
+                    prompt_tokens=jr.prompt_tokens, completion_tokens=jr.completion_tokens,
+                    total_tokens=jr.total_tokens)
         if jr.status == "ok":
             for f in jr.findings:
                 lh = _make_llm_hit(f, orig)
@@ -151,9 +154,12 @@ def smart_rewrite(text: str, industry: str = "general", platform: str = "douyin"
         j = judge or _default_judge()
         summary = [{"category": r.get("category", ""), "severity": base["risk_level"],
                     "match": r.get("from", "")} for r in base.get("replacements", [])]
-        # natural_rewrite 返回 (text, status, model_or_error)
-        cand, status, info = j.natural_rewrite(orig, summary)
+        # natural_rewrite 返回 (text, status, model_or_error, usage)
+        cand, status, info, usage = j.natural_rewrite(orig, summary)
         meta["status"] = status
+        meta["prompt_tokens"] = usage.get("prompt_tokens", 0)
+        meta["completion_tokens"] = usage.get("completion_tokens", 0)
+        meta["total_tokens"] = usage.get("total_tokens", 0)
         if status == "ok":
             meta["model"] = info
             if cand and cand.strip():

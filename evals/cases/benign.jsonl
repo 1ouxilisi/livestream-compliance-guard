@@ -19,3 +19,12 @@
 {"id":"b19","industry":"food","platform":"taobao","expect_risk":"clean","text":"这款燕麦片燕麦含量高，开水冲泡即食，早餐搭配牛奶口感更佳","note":"普通食品食用场景，应放行"}
 {"id":"b20","industry":"cosmetics","platform":"kuaishou","expect_risk":"clean","text":"这款唇釉显色度高，雾面质地，日常提气色，卸妆后不残留","note":"普通妆效描述，应放行"}
 {"id":"b21","industry":"general","platform":"douyin","expect_risk":"clean","text":"订单已发出，快递单号可在订单详情查看，有问题联系在线客服","note":"正常客服售后话术，应放行"}
+{"id":"b22","industry":"general","platform":"taobao","expect_risk":"clean","text":"这款双肩包采用耐磨尼龙面料，内衬加厚，背面有透气垫，适合通勤与短途出行。","note":"普通箱包客观材质/结构描述，应放行"}
+{"id":"b23","industry":"general","platform":"taobao","expect_risk":"clean","text":"我们提供一年质保，非人为损坏可联系客服登记售后。","note":"正常质保售后条款，非终身不坏承诺，应放行"}
+{"id":"b24","industry":"general","platform":"douyin","expect_risk":"clean","text":"这款台灯三档亮度可调，USB 充电，书桌床头都能用。","note":"普通家电参数与使用场景，应放行"}
+{"id":"b25","industry":"general","platform":"douyin","expect_risk":"clean","text":"今天直播间给大家介绍第三款，是我们上一周补货回来的收纳箱。","note":"“第三款/上一周”为次序与时间，序数消歧后应放行"}
+{"id":"b26","industry":"food","platform":"douyin","expect_risk":"clean","text":"这款黑咖啡选用阿拉比卡豆，中度烘焙，苦味醇厚，建议加牛奶冲调。","note":"普通食品原料/工艺/口感描述，应放行"}
+{"id":"b27","industry":"food","platform":"taobao","expect_risk":"clean","text":"低脂酸奶原味发酵，开盖即食，可搭配燕麦和新鲜水果。","note":"普通食品食用场景，应放行"}
+{"id":"b28","industry":"cosmetics","platform":"douyin","expect_risk":"clean","text":"这款面膜纸布轻薄，精华液滋润，敷完感觉肌肤水润清爽。","note":"普通肤感描述，无医疗/速效宣称，应放行"}
+{"id":"b29","industry":"cosmetics","platform":"kuaishou","expect_risk":"clean","text":"洗发水添加控油成分，洗后头皮清爽，发丝柔顺，适合油性发质。","note":"控油/柔顺为合规普通护发功效，应放行"}
+{"id":"b30","industry":"jadeite","platform":"douyin","expect_risk":"clean","text":"这只手镯圈口56，质地细腻，配鉴定证书，支持全国复检，实拍无美颜。","note":"无种水品级词，仅圈口/证书/复检等客观信息，应放行"}

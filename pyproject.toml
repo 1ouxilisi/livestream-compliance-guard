@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "livestream-compliance-guard"
-version = "0.7.0"
+version = "0.7.1"
 description = "Real-time compliance guard MCP for China live commerce (Advertising Law + platform rules), jadeite-first, with a language-neutral rule core."
 keywords = ["mcp", "live-commerce", "compliance", "advertising-law", "banned-words", "content-moderation", "jadeite", "china"]
 readme = "README.md"
@@ -24,6 +24,10 @@ dev = ["ruff>=0.6", "pytest>=8.0", "pytest-asyncio>=0.24", "mcp>=1.27.2,<2", "uv
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lcg"]
+
+# 规则词库是运行时事实源，需随包打入 wheel（映射到 lcg/rules，供 importlib.resources 定位）
+[tool.hatch.build.targets.wheel.force-include]
+"rules" = "lcg/rules"
 
 [tool.ruff]
 line-length = 100

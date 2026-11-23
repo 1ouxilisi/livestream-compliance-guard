@@ -111,6 +111,9 @@ class LLMConfig:
     timeout: float = 20.0
     max_calls: int = 200          # 单进程调用预算；0 = 直接禁用 LLM
     temperature: float = 0.0
+    # 单价（每百万 token，币种随 provider 账单；0 = 未配置，成本估算只报 token 量）
+    price_input_per_mtok: float = 0.0
+    price_output_per_mtok: float = 0.0
 
     @classmethod
     def from_env(cls, env: Optional[Dict[str, str]] = None) -> "LLMConfig":
@@ -146,14 +149,24 @@ class LLMConfig:
             api_key=key,
             timeout=_float("LCG_LLM_TIMEOUT", 20.0),
             max_calls=_int("LCG_LLM_MAX_CALLS", 200),
+            price_input_per_mtok=_float("LCG_PRICE_INPUT_PER_MTOK", 0.0),
+            price_output_per_mtok=_float("LCG_PRICE_OUTPUT_PER_MTOK", 0.0),
         )
+
+
+def _zero_usage() -> Dict[str, int]:
+    return {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+
+def _add_usage(a: Dict[str, int], b: Dict[str, int]) -> Dict[str, int]:
+    return {k: a.get(k, 0) + b.get(k, 0) for k in ("prompt_tokens", "completion_tokens", "total_tokens")}
 
 
 class LLMBackend(Protocol):
     name: str
 
     def chat(self, model: str, messages: List[Dict[str, str]], *,
-             json_mode: bool, timeout: float) -> str: ...
+             json_mode: bool, timeout: float) -> tuple: ...
 
 
 class OpenAIBackend:
@@ -178,7 +191,7 @@ class OpenAIBackend:
         return self._client
 
     def chat(self, model: str, messages: List[Dict[str, str]], *,
-             json_mode: bool = True, timeout: Optional[float] = None) -> str:
+             json_mode: bool = True, timeout: Optional[float] = None) -> tuple:
         client = self._ensure()
         kwargs: Dict[str, Any] = {
             "model": model, "messages": messages, "temperature": self.cfg.temperature,
@@ -188,7 +201,17 @@ class OpenAIBackend:
         if timeout is not None:
             kwargs["timeout"] = timeout
         comp = client.chat.completions.create(**kwargs)
-        return comp.choices[0].message.content or ""
+        content = comp.choices[0].message.content or ""
+        usage = getattr(comp, "usage", None)
+        if usage is not None:
+            u = {
+                "prompt_tokens": getattr(usage, "prompt_tokens", 0) or 0,
+                "completion_tokens": getattr(usage, "completion_tokens", 0) or 0,
+                "total_tokens": getattr(usage, "total_tokens", 0) or 0,
+            }
+        else:
+            u = _zero_usage()
+        return content, u
 
 
 class FakeBackend:
@@ -196,21 +219,25 @@ class FakeBackend:
     name = "fake"
 
     def __init__(self, detect_payload: Any = None, rewrite_text: Any = None,
-                 fail_models: Optional[set] = None, raise_exc: Optional[BaseException] = None):
+                 fail_models: Optional[set] = None, raise_exc: Optional[BaseException] = None,
+                 usage: Optional[Dict[str, int]] = None):
         # detect_payload：dict / list（按调用次序）/ callable(calls)->dict|str / 原始 str
         self._detect_payload = detect_payload
         self._rewrite_text = rewrite_text
+        self._usage = usage or _zero_usage()
         self.fail_models = fail_models or set()
         self.raise_exc = raise_exc
         self.calls = 0
         self.models_seen: List[str] = []
         self.last_messages: Optional[List[Dict[str, str]]] = None
+        self.last_usage: Dict[str, int] = _zero_usage()
 
     def chat(self, model: str, messages: List[Dict[str, str]], *,
-             json_mode: bool = True, timeout: Optional[float] = None) -> str:
+             json_mode: bool = True, timeout: Optional[float] = None) -> tuple:
         self.calls += 1
         self.models_seen.append(model)
         self.last_messages = messages
+        self.last_usage = dict(self._usage)
         if self.raise_exc is not None:
             raise self.raise_exc
         if model in self.fail_models:
@@ -218,17 +245,18 @@ class FakeBackend:
         sysj = next((m.get("content", "") for m in messages if m.get("role") == "system"), "")
         if sysj.startswith(_REWRITE_TAG):
             if self._rewrite_text is None:
-                return ""
-            return self._rewrite_text if isinstance(self._rewrite_text, str) \
-                else json.dumps(self._rewrite_text, ensure_ascii=False)
+                return "", self.last_usage
+            return (self._rewrite_text if isinstance(self._rewrite_text, str)
+                    else json.dumps(self._rewrite_text, ensure_ascii=False)), self.last_usage
         payload = self._detect_payload
         if isinstance(payload, Callable):
             payload = payload(self.calls)
         if isinstance(payload, list):
             payload = payload[min(self.calls - 1, len(payload) - 1)]
         if payload is None:
-            return json.dumps({"overall": "clean", "findings": []}, ensure_ascii=False)
-        return payload if isinstance(payload, str) else json.dumps(payload, ensure_ascii=False)
+            return json.dumps({"overall": "clean", "findings": []}, ensure_ascii=False), self.last_usage
+        return (payload if isinstance(payload, str)
+                else json.dumps(payload, ensure_ascii=False)), self.last_usage
 
 
 @dataclass
@@ -250,6 +278,9 @@ class JudgeResult:
     error: str = ""
     cached: bool = False
     calls: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
 
 
 def _loads_json(raw: str) -> tuple:
@@ -335,7 +366,7 @@ class LLMJudge:
         return "ok"
 
     def _chat_with_fallback(self, messages: List[Dict[str, str]], json_mode: bool) -> tuple:
-        """返回 (raw, status, model, exc)；主模型失败切备用，逐次计入预算。"""
+        """返回 (raw, status, model, exc, usage)；主模型失败切备用，usage 跨调用累加。"""
         if self.backend is not None:
             backend = self.backend
             models = [m for m in (self.cfg.model_primary or "fake-model",
@@ -344,20 +375,22 @@ class LLMJudge:
             backend = OpenAIBackend(self.cfg)
             models = [m for m in (self.cfg.model_primary, self.cfg.model_fallback) if m]
         if not models:
-            return None, "no_model", "", None
+            return None, "no_model", "", None, _zero_usage()
         last_exc: Optional[BaseException] = None
+        usage = _zero_usage()
         for model in models:
             if self.calls >= self.cfg.max_calls:
-                return None, "budget", model, None
+                return None, "budget", model, None, usage
             self.calls += 1
             try:
-                raw = backend.chat(model, messages, json_mode=json_mode,
-                                   timeout=self.cfg.timeout)
-                return raw, "ok", model, None
+                raw, u = backend.chat(model, messages, json_mode=json_mode,
+                                      timeout=self.cfg.timeout)
+                usage = _add_usage(usage, u)
+                return raw, "ok", model, None, usage
             except Exception as exc:  # 含超时、网络、鉴权、SDK 缺失
                 last_exc = exc
                 continue
-        return None, "error", models[0], last_exc
+        return None, "error", models[0], last_exc, usage
 
     # -- 语义检测 -----------------------------------------------------------
     def semantic_detect(self, text: str, industry: str, platform: str,
@@ -373,7 +406,10 @@ class LLMJudge:
             return JudgeResult(status=base.status, findings=list(base.findings),
                                overall=base.overall, model=base.model,
                                prompt_version=base.prompt_version, error=base.error,
-                               cached=True, calls=self.calls)
+                               cached=True, calls=self.calls,
+                               prompt_tokens=base.prompt_tokens,
+                               completion_tokens=base.completion_tokens,
+                               total_tokens=base.total_tokens)
         messages = [
             {"role": "system", "content": DETECT_SYSTEM},
             {"role": "user", "content":
@@ -381,25 +417,27 @@ class LLMJudge:
                 f"现有规则风险类别供参考：{', '.join(categories) if categories else '无'}。\n"
                 f"请审查下面这段主播话术：\n{text}"},
         ]
-        raw, status, model, exc = self._chat_with_fallback(messages, json_mode=True)
+        raw, status, model, exc, usage = self._chat_with_fallback(messages, json_mode=True)
         if status != "ok":
             return JudgeResult(status=status, model=model,
-                               error=(str(exc) if exc else ""), calls=self.calls)
+                               error=(str(exc) if exc else ""), calls=self.calls,
+                               **usage)
         data, perr = _loads_json(raw or "")
         if data is None:
-            return JudgeResult(status="parse_error", model=model, error=perr, calls=self.calls)
+            return JudgeResult(status="parse_error", model=model, error=perr,
+                               calls=self.calls, **usage)
         findings, overall = _parse_findings(data)
         res = JudgeResult(status="ok", findings=findings, overall=overall,
-                          model=model, calls=self.calls)
+                          model=model, calls=self.calls, **usage)
         self._detect_cache[cache_key] = res
         return res
 
     # -- 自然整句改写 -------------------------------------------------------
     def natural_rewrite(self, text: str, hits_summary: List[Dict[str, str]]) -> tuple:
-        """返回 (rewritten_text, status, model_or_error)。"""
+        """返回 (rewritten_text, status, model_or_error, usage)。"""
         avail = self.availability()
         if avail != "ok":
-            return "", avail, ""
+            return "", avail, "", _zero_usage()
         summary = "；".join(f"{h.get('severity', '')}:{h.get('category', '')}({h.get('match', '')})"
                             for h in hits_summary)
         messages = [
@@ -407,7 +445,7 @@ class LLMJudge:
             {"role": "user", "content":
                 f"需要消除的风险点：{summary}\n请改写下面这句主播话术：\n{text}"},
         ]
-        raw, status, model, exc = self._chat_with_fallback(messages, json_mode=False)
+        raw, status, model, exc, usage = self._chat_with_fallback(messages, json_mode=False)
         if status != "ok":
-            return "", status, (str(exc) if exc else "")
-        return _extract_rewrite(raw), "ok", model
+            return "", status, (str(exc) if exc else ""), usage
+        return _extract_rewrite(raw), "ok", model, usage

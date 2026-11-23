@@ -1,4 +1,4 @@
-# Tool I/O Schema · 直播电商合规守卫 MCP（软件 v0.7.0 / 核心规则 v1.4 ＋ 行业插件 v1.0）
+# Tool I/O Schema · 直播电商合规守卫 MCP（软件 v0.7.1 / 核心规则 v1.4 ＋ 行业插件 v1.0）
 
 传输：stdio（`python server.py`）或 Streamable HTTP（`python -m lcg.server_http`，MCP 端点 `/mcp`、健康检查 `/healthz`、可选 `Authorization: Bearer <LCG_BEARER_TOKEN>`，详见 `examples/mcp-client.http.md`）。两种传输暴露同一组 6 个工具：4 个纯规则确定性工具（scan_text / scan_livestream / compliance_rules / safe_rewrite）与 2 个规则＋LLM 融合工具（scan_smart / rewrite_smart）。
 
@@ -63,7 +63,8 @@
 { "risk_level": "high", "clean": false, "count": 3, "hits": [ Hit(rule…), Hit(llm…) ],
   "industry": "general", "platform": "douyin", "mode": "rules_plus_llm",
   "llm": { "status": "ok", "model": "…", "prompt_version": "detect-v3",
-           "rewrite_prompt_version": "rewrite-v1", "cached": false, "calls": 1, "error": "" },
+           "rewrite_prompt_version": "rewrite-v1", "cached": false, "calls": 1, "error": "",
+           "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0 },
   "disclaimer": "…" }
 // ->（降级，结果与 scan_text 一致）
 { "…": "…", "mode": "rules_only",

@@ -235,3 +235,57 @@ def test_config_from_env(monkeypatch):
 def test_config_disabled(monkeypatch):
     monkeypatch.setenv("LCG_LLM_ENABLED", "0")
     assert LLMConfig.from_env().enabled is False
+
+
+# ---------- token usage 计量与透传 ----------
+def test_usage_collected_and_passthrough():
+    fake = FakeBackend(detect_payload=high_payload(),
+                       usage={"prompt_tokens": 120, "completion_tokens": 30, "total_tokens": 150})
+    r = analyze(A, "general", "douyin", judge=make_judge(fake))
+    assert r["llm"]["status"] == "ok"
+    assert r["llm"]["prompt_tokens"] == 120
+    assert r["llm"]["completion_tokens"] == 30
+    assert r["llm"]["total_tokens"] == 150
+
+
+def test_usage_carried_on_cache_hit():
+    fake = FakeBackend(detect_payload=high_payload(),
+                       usage={"prompt_tokens": 120, "completion_tokens": 30, "total_tokens": 150})
+    j = make_judge(fake)
+    analyze(A, "general", "douyin", judge=j)
+    r2 = analyze(A, "general", "douyin", judge=j)
+    assert r2["llm"]["cached"] is True and fake.calls == 1
+    # 缓存命中沿用基准那次的 token 量，不重复计费也不归零
+    assert r2["llm"]["total_tokens"] == 150
+    assert r2["llm"]["prompt_tokens"] == 120
+
+
+def test_usage_accumulated_across_fallback():
+    fake = FakeBackend(detect_payload=high_payload(), fail_models={"bad-model"},
+                       usage={"prompt_tokens": 100, "completion_tokens": 20, "total_tokens": 120})
+    j = LLMJudge(make_cfg(model_primary="bad-model", model_fallback="good-model"),
+                 backend=fake)
+    r = analyze(A, "general", "douyin", judge=j)
+    assert r["llm"]["status"] == "ok" and fake.calls == 2
+    # 仅成功调用计 token；主模型异常那次不计费，usage 只来自备用成功调用
+    assert r["llm"]["prompt_tokens"] == 100
+    assert r["llm"]["completion_tokens"] == 20
+    assert r["llm"]["total_tokens"] == 120
+
+
+def test_rewrite_usage_passthrough():
+    fake = FakeBackend(rewrite_text=D,
+                       usage={"prompt_tokens": 90, "completion_tokens": 25, "total_tokens": 115})
+    r = smart_rewrite(C, "jadeite", "douyin", judge=make_judge(fake))
+    assert r["llm"]["status"] == "ok"
+    assert r["llm"]["prompt_tokens"] == 90
+    assert r["llm"]["completion_tokens"] == 25
+    assert r["llm"]["total_tokens"] == 115
+
+
+def test_config_price_from_env(monkeypatch):
+    monkeypatch.setenv("LCG_PRICE_INPUT_PER_MTOK", "2.5")
+    monkeypatch.setenv("LCG_PRICE_OUTPUT_PER_MTOK", "8.0")
+    c = LLMConfig.from_env()
+    assert c.price_input_per_mtok == 2.5
+    assert c.price_output_per_mtok == 8.0

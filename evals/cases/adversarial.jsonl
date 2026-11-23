@@ -28,3 +28,15 @@
 {"id":"a28","industry":"cosmetics","platform":"douyin","expect_risk":"high","expect_any":["消炎"],"text":"这款精华消炎祛痘，药用成分，七天淡斑","note":"化妆品消炎/药用医疗作用宣称"}
 {"id":"a29","industry":"general","platform":"kuaishou","expect_risk":"high","text":"想要的加薇信 qq8899123 私下发货","note":"薇信+号码变体站外导流，正则命中"}
 {"id":"a30","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["开光","招财","转运"],"text":"开光加持，招财转运，磁场能量超强","note":"迷信伪科学功效叠加"}
+{"id":"a31","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["永久","终身不坏","零风险"],"text":"我们承诺永久保修，终身不坏，零风险购买。","note":"永久/终身不坏/零风险，虚假承诺与风险保证，判 high"}
+{"id":"a32","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["投资首选","只涨不跌"],"text":"买这个投资首选，以后只涨不跌。","note":"投资首选+只涨不跌，收益承诺判 high"}
+{"id":"a33","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["二维码","进群"],"text":"扫描屏幕二维码，进群领取专属福利。","note":"扫码/二维码/进群站外导流，判 high"}
+{"id":"a34","industry":"cosmetics","platform":"douyin","expect_risk":"medium","expect_any":["销量冠军","吊打"],"text":"这款面膜是销量冠军，吊打某国际大牌。","note":"贬低同类+无依据销量排名，化妆品包判 medium"}
+{"id":"a35","industry":"food","platform":"douyin","expect_risk":"high","expect_any":["没有任何副作用"],"text":"纯天然草本萃取，没有任何副作用，老人小孩都能放心吃。","note":"食品安全性断言，插件规则判 high"}
+{"id":"a36","industry":"food","platform":"douyin","expect_risk":"high","expect_any":["根治","失眠","便秘"],"text":"坚持喝一个疗程，失眠根治，便秘也通了。","note":"食品疾病治疗宣称（失眠/便秘根治），判 high"}
+{"id":"a37","industry":"cosmetics","platform":"douyin","expect_risk":"high","expect_any":["永不反弹","立刻见效"],"text":"这款精华七天淡斑，永不反弹，立刻见效。","note":"速效+永不反弹+立刻见效，化妆品插件判 high"}
+{"id":"a38","industry":"cosmetics","platform":"douyin","expect_risk":"high","expect_any":["医用级","红血丝","祛疤"],"text":"医用级精华液，临床修复红血丝，祛疤无痕。","note":"医用级/修复红血丝/祛疤医疗作用宣称，判 high"}
+{"id":"a39","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["招财","转运","保平安"],"text":"戴这串珠子招财转运，还能保平安。","note":"迷信伪科学功效叠加，判 high"}
+{"id":"a40","industry":"jadeite","platform":"douyin","expect_risk":"high","expect_any":["之王","收藏级","玻璃种"],"text":"这个翡翠是老坑玻璃种，收藏级满绿，性价比之王。","note":"夸饰品相叠加“之王”绝对化，升至 high"}
+{"id":"a41","industry":"food","platform":"douyin","expect_risk":"high","expect_any":["患者反馈","无效退款"],"text":"医生都在喝的酵素，患者反馈血糖稳了，无效退款。","note":"医疗代言+疗效暗示+无效退款，判 high"}
+{"id":"a42","industry":"general","platform":"taobao","expect_risk":"high","expect_any":["私下转账","支付宝直转"],"text":"拍下后私下转账给你，走支付宝直转更便宜。","note":"站外私下交易与支付宝直转，淘宝规则判 high"}

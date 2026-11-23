@@ -10,8 +10,7 @@ bench_perf.py —— 规则层性能与 LLM 层成本基准（零第三方依赖
 
 口径与边界（务必随报告一起阅读）：
   · 规则层延迟为本机单次进程内测量，受机器负载影响，仅供相对比较，不代表生产 SLA；
-  · 当前 LLM 后端未回传 token usage，成本只能按「调用次数 × 估算单价」做公式占位，
-    精确单句成本需在后端接入 usage 上报后再核算；
+  · LLM 层 usage 已由后端解析并透传，报告汇总输入/输出/总 token；单价未配置时只报 token 量；
   · 在线 LLM 延迟受网络与模型排队影响，波动大，不作为离线门禁。
 
 运行：python scripts/bench_perf.py
@@ -113,7 +112,11 @@ def bench_batch() -> dict:
 
 
 def bench_llm() -> dict:
-    """LLM 层抽样；不可用时返回 skipped，不影响规则层结论。"""
+    """LLM 层抽样；不可用时返回 skipped，不影响规则层结论。
+
+    usage 由后端 ``comp.usage`` 解析并经 JudgeResult/pipeline meta 透传；
+    单价（每百万 token，币种随 provider 账单）未配置时只汇总 token 量、不报金额。
+    """
     cfg = LLMConfig.from_env()
     judge = LLMJudge(cfg)
     avail = judge.availability()
@@ -121,17 +124,35 @@ def bench_llm() -> dict:
         return {"status": "skipped", "reason": avail, "samples": 0, "runs": []}
 
     runs = []
+    tot = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
     for ind, plat, text in SAMPLES[:LLM_SAMPLE]:
         t0 = time.perf_counter()
         r = pipeline.analyze(text, ind, plat, judge=judge)
         lat = (time.perf_counter() - t0) * 1000
+        meta = r["llm"]
+        pt = meta.get("prompt_tokens", 0)
+        ct = meta.get("completion_tokens", 0)
+        tt = meta.get("total_tokens", 0)
+        tot["prompt_tokens"] += pt
+        tot["completion_tokens"] += ct
+        tot["total_tokens"] += tt
         runs.append({
             "mode": r["mode"],
-            "status": r["llm"]["status"],
-            "model": r["llm"]["model"],
-            "calls": r["llm"]["calls"],
+            "status": meta["status"],
+            "model": meta["model"],
+            "calls": meta["calls"],
+            "prompt_tokens": pt,
+            "completion_tokens": ct,
+            "total_tokens": tt,
             "latency_ms": round(lat, 1),
         })
+
+    price_in = cfg.price_input_per_mtok
+    price_out = cfg.price_output_per_mtok
+    cost = None
+    if price_in > 0 or price_out > 0:
+        cost = (tot["prompt_tokens"] / 1_000_000) * price_in \
+            + (tot["completion_tokens"] / 1_000_000) * price_out
     return {
         "status": "ok",
         "model_primary": cfg.model_primary,
@@ -139,7 +160,10 @@ def bench_llm() -> dict:
         "timeout_s": cfg.timeout,
         "samples": len(runs),
         "runs": runs,
-        "note": "后端未回传 token usage；单句成本需接入 usage 上报后按单价核算。",
+        "totals": tot,
+        "price_in_per_mtok": price_in,
+        "price_out_per_mtok": price_out,
+        "cost": cost,
     }
 
 
@@ -186,15 +210,33 @@ def main() -> int:
             f"- 主力模型：`{llm['model_primary']}`；"
             f"兜底：`{llm['model_fallback'] or '无'}`；超时 {llm['timeout_s']}s",
             "",
-            "| 样本 | mode | 状态 | 模型 | 调用次数 | 延迟 ms |",
-            "|---|---|---|---|---|---|",
+            "| 样本 | mode | 状态 | 模型 | 调用 | 输入 token | 输出 token | 总 token | 延迟 ms |",
+            "|---|---|---|---|---|---|---|---|---|",
         ]
         for i, r in enumerate(llm["runs"], 1):
             L.append(
                 f"| {i} | {r['mode']} | {r['status']} | {r['model']} "
-                f"| {r['calls']} | {r['latency_ms']} |"
+                f"| {r['calls']} | {r['prompt_tokens']} | {r['completion_tokens']} "
+                f"| {r['total_tokens']} | {r['latency_ms']} |"
             )
-        L += ["", f"> {llm['note']}"]
+        tot = llm["totals"]
+        L += [
+            "",
+            f"- 抽样合计：输入 {tot['prompt_tokens']} tokens，"
+            f"输出 {tot['completion_tokens']} tokens，"
+            f"总计 {tot['total_tokens']} tokens（{llm['samples']} 条样本）。",
+        ]
+        if llm["cost"] is not None:
+            L.append(
+                f"- 估算成本：输入单价 {llm['price_in_per_mtok']}/百万 token，"
+                f"输出单价 {llm['price_out_per_mtok']}/百万 token，"
+                f"本批约 {llm['cost']:.4f}（币种随 provider 账单）。"
+            )
+        else:
+            L.append(
+                "- 单价未配置：设置 `LCG_PRICE_INPUT_PER_MTOK` / `LCG_PRICE_OUTPUT_PER_MTOK`"
+                "（每百万 token 单价）后，报告自动给出估算金额；当前仅汇总 token 量。"
+            )
     else:
         L += [
             f"- 状态：skipped（`{llm['reason']}`）；"
@@ -203,12 +245,13 @@ def main() -> int:
 
     L += [
         "",
-        "## 成本口径（待接入 usage 后精确核算）",
+        "## 成本口径",
         "",
         "- 规则层：零第三方模型调用，仅本机 CPU 成本，单句延迟见上表。",
         "- LLM 层：每条话术最多 1 次检测调用；命中风险时改写另计 1 次。",
-        "- 单句成本 ≈（检测 prompt tokens + 补判 tokens）× 输入单价 + 输出 tokens × 输出单价；"
-        "当前后端未回传 usage，上表未给金额，需在 `OpenAIBackend` 解析 `usage` 后补充。",
+        "- 单句成本 ≈（输入 tokens ÷ 100 万）× 输入单价 ＋（输出 tokens ÷ 100 万）× 输出单价；"
+        "usage 已由后端 `comp.usage` 解析并经 meta 透传，"
+        "单价经环境变量配置，未配置时只报 token 量、不报金额。",
         "",
         "> 仅为合规风险提示，不构成法律意见；性能数据随机器与负载波动。",
         "",

@@ -9,37 +9,38 @@
 | 指标 | 数值 |
 |---|---|
 | 检测调用次数 | 2400 |
-| 平均延迟 | 1.80 ms |
-| P50 | 1.74 ms |
-| P95 | 2.46 ms |
-| 最大延迟 | 3.47 ms |
-| 吞吐 | 556 句/秒 |
+| 平均延迟 | 1.93 ms |
+| P50 | 1.91 ms |
+| P95 | 2.72 ms |
+| 最大延迟 | 9.53 ms |
+| 吞吐 | 518 句/秒 |
 
 ## 批量检测（scan_batch）
 
 | 指标 | 数值 |
 |---|---|
 | 消息条数 | 120 |
-| 总耗时 | 171.8 ms |
-| 单句均摊 | 1.43 ms |
+| 总耗时 | 204.3 ms |
+| 单句均摊 | 1.70 ms |
 | 命中分段 | 60（high 命中 220） |
 
 ## LLM 语义层（抽样）
 
 - 主力模型：`Qwen/Qwen3-14B`；兜底：`deepseek-ai/DeepSeek-V3`；超时 30.0s
 
-| 样本 | mode | 状态 | 模型 | 调用次数 | 延迟 ms |
-|---|---|---|---|---|---|
-| 1 | rules_plus_llm | ok | Qwen/Qwen3-14B | 1 | 7812.4 |
-| 2 | rules_plus_llm | ok | Qwen/Qwen3-14B | 2 | 3746.6 |
-| 3 | rules_plus_llm | ok | Qwen/Qwen3-14B | 3 | 2654.5 |
+| 样本 | mode | 状态 | 模型 | 调用 | 输入 token | 输出 token | 总 token | 延迟 ms |
+|---|---|---|---|---|---|---|---|---|
+| 1 | rules_plus_llm | ok | Qwen/Qwen3-14B | 1 | 1109 | 200 | 1309 | 14398.7 |
+| 2 | rules_plus_llm | ok | Qwen/Qwen3-14B | 2 | 1074 | 261 | 1335 | 6572.7 |
+| 3 | rules_plus_llm | ok | Qwen/Qwen3-14B | 3 | 1071 | 89 | 1160 | 2375.8 |
 
-> 后端未回传 token usage；单句成本需接入 usage 上报后按单价核算。
+- 抽样合计：输入 3254 tokens，输出 550 tokens，总计 3804 tokens（3 条样本）。
+- 单价未配置：设置 `LCG_PRICE_INPUT_PER_MTOK` / `LCG_PRICE_OUTPUT_PER_MTOK`（每百万 token 单价）后，报告自动给出估算金额；当前仅汇总 token 量。
 
-## 成本口径（待接入 usage 后精确核算）
+## 成本口径
 
 - 规则层：零第三方模型调用，仅本机 CPU 成本，单句延迟见上表。
 - LLM 层：每条话术最多 1 次检测调用；命中风险时改写另计 1 次。
-- 单句成本 ≈（检测 prompt tokens + 补判 tokens）× 输入单价 + 输出 tokens × 输出单价；当前后端未回传 usage，上表未给金额，需在 `OpenAIBackend` 解析 `usage` 后补充。
+- 单句成本 ≈（输入 tokens ÷ 100 万）× 输入单价 ＋（输出 tokens ÷ 100 万）× 输出单价；usage 已由后端 `comp.usage` 解析并经 meta 透传，单价经环境变量配置，未配置时只报 token 量、不报金额。
 
 > 仅为合规风险提示，不构成法律意见；性能数据随机器与负载波动。

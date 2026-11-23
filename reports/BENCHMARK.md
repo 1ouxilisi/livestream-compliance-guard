@@ -2,10 +2,10 @@
 
 - 生成日期：2026-11-23
 - 评测对象：`lcg` 规则引擎（src/lcg；规则源为核心包 rules.v1.json ＋ rules/plugins/*.json 行业插件；根 server.py 为兼容 shim）
-- 规则层用例：51 条（良性 21，对抗 30）
-- **整体通过率：100.0%**（51/51）
-- **高危样本检出率：100.0%**（27/27）
-- **干净样本误报率：0.0%**（0/17，越低越好）
+- 规则层用例：72 条（良性 30，对抗 42）
+- **整体通过率：100.0%**（72/72）
+- **高危样本检出率：100.0%**（38/38）
+- **干净样本误报率：0.0%**（0/26，越低越好）
 - LLM 层红队用例：4 条（注入/越狱，交由 DeepTeam·PyRIT 在 LLM 层裁决）
 - 语义层待跑用例：3 条（谐音/拆字/emoji/暗示，规则层已确认漏检，配 key 后由 LLM 层裁决）
 
@@ -32,6 +32,15 @@
 | b19 | benign | clean | clean | PASS | 0 | 普通食品食用场景，应放行 |
 | b20 | benign | clean | clean | PASS | 0 | 普通妆效描述，应放行 |
 | b21 | benign | clean | clean | PASS | 0 | 正常客服售后话术，应放行 |
+| b22 | benign | clean | clean | PASS | 0 | 普通箱包客观材质/结构描述，应放行 |
+| b23 | benign | clean | clean | PASS | 0 | 正常质保售后条款，非终身不坏承诺，应放行 |
+| b24 | benign | clean | clean | PASS | 0 | 普通家电参数与使用场景，应放行 |
+| b25 | benign | clean | clean | PASS | 0 | “第三款/上一周”为次序与时间，序数消歧后应放行 |
+| b26 | benign | clean | clean | PASS | 0 | 普通食品原料/工艺/口感描述，应放行 |
+| b27 | benign | clean | clean | PASS | 0 | 普通食品食用场景，应放行 |
+| b28 | benign | clean | clean | PASS | 0 | 普通肤感描述，无医疗/速效宣称，应放行 |
+| b29 | benign | clean | clean | PASS | 0 | 控油/柔顺为合规普通护发功效，应放行 |
+| b30 | benign | clean | clean | PASS | 0 | 无种水品级词，仅圈口/证书/复检等客观信息，应放行 |
 | a01 | adversarial | high | high | PASS | 14 | 多重高危叠加 |
 | a02 | adversarial | high | high | PASS | 9 | 绝对化用语+虚构紧迫感 |
 | a03 | adversarial | high | high | PASS | 5 | 迷信伪科学+医疗功效 |
@@ -62,6 +71,18 @@
 | a28 | adversarial | high | high | PASS | 2 | 化妆品消炎/药用医疗作用宣称 |
 | a29 | adversarial | high | high | PASS | 1 | 薇信+号码变体站外导流，正则命中 |
 | a30 | adversarial | high | high | PASS | 3 | 迷信伪科学功效叠加 |
+| a31 | adversarial | high | high | PASS | 3 | 永久/终身不坏/零风险，虚假承诺与风险保证，判 high |
+| a32 | adversarial | high | high | PASS | 4 | 投资首选+只涨不跌，收益承诺判 high |
+| a33 | adversarial | high | high | PASS | 2 | 扫码/二维码/进群站外导流，判 high |
+| a34 | adversarial | medium | medium | PASS | 3 | 贬低同类+无依据销量排名，化妆品包判 medium |
+| a35 | adversarial | high | high | PASS | 2 | 食品安全性断言，插件规则判 high |
+| a36 | adversarial | high | high | PASS | 3 | 食品疾病治疗宣称（失眠/便秘根治），判 high |
+| a37 | adversarial | high | high | PASS | 4 | 速效+永不反弹+立刻见效，化妆品插件判 high |
+| a38 | adversarial | high | high | PASS | 6 | 医用级/修复红血丝/祛疤医疗作用宣称，判 high |
+| a39 | adversarial | high | high | PASS | 3 | 迷信伪科学功效叠加，判 high |
+| a40 | adversarial | high | high | PASS | 6 | 夸饰品相叠加“之王”绝对化，升至 high |
+| a41 | adversarial | high | high | PASS | 4 | 医疗代言+疗效暗示+无效退款，判 high |
+| a42 | adversarial | high | high | PASS | 2 | 站外私下交易与支付宝直转，淘宝规则判 high |
 
 > 复现：`python evals/run_evals.py`。本报告由脚本生成，规则或用例变更后在 CI 自动刷新。
 > 仅为合规风险提示，不构成法律意见，以监管机关与平台最新规则为准。

@@ -16,8 +16,32 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-# src/lcg/rules_store.py -> parents[2] 即项目根
-RULES_DIR = Path(__file__).resolve().parents[2] / "rules"
+
+# 规则目录按以下顺序解析，兼容三种运行布局：
+#   1. 包内数据（wheel / 安装后，lcg/rules 随包打入）；
+#   2. 源码布局（src/lcg/rules_store.py -> 项目根/rules，PYTHONPATH=src 或仓库直跑）；
+#   3. 进程工作目录（Docker 整仓拷贝到 /app 后从 cwd 运行）。
+def _candidate_rules_dirs() -> List[Path]:
+    here = Path(__file__).resolve()
+    candidates: List[Path] = [here.parents[2] / "rules", Path.cwd() / "rules"]
+    try:
+        from importlib.resources import files
+
+        candidates.insert(0, Path(str(files("lcg") / "rules")))
+    except Exception:
+        pass
+    return candidates
+
+
+def _resolve_rules_dir() -> Path:
+    for directory in _candidate_rules_dirs():
+        if (directory / "rules.v1.json").exists():
+            return directory
+    # 均未命中时回退源码布局，保留原有“文件缺失”报错路径。
+    return Path(__file__).resolve().parents[2] / "rules"
+
+
+RULES_DIR = _resolve_rules_dir()
 RULES_PATH = RULES_DIR / "rules.v1.json"
 PLUGINS_DIR = RULES_DIR / "plugins"
 
