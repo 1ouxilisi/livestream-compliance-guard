@@ -5,8 +5,12 @@
 |---|---|---|
 | `cases/benign.jsonl` | 干净/合规话术，测**误报** | 规则层 |
 | `cases/adversarial.jsonl` | 违规话术，测**检出** | 规则层 |
-| `cases/redteam.jsonl` | 注入/拆字/emoji/越狱 | **LLM 层**（DeepTeam/PyRIT，P1） |
-| `cases/semantic.jsonl` | 谐音/暗示，规则层设计内漏检 | **LLM 语义层** |
+| `cases/redteam.jsonl` | 注入/拆字/emoji/越狱/冒充权威/指令覆盖，含中文与英文样例 | **LLM 层**（DeepTeam/PyRIT，P1） |
+| `cases/semantic.jsonl` | 谐音/暗示，规则层设计内漏检，含中文与英文样例 | **LLM 语义层** |
+
+> 语言口径：核心规则词表为 `zh-CN`，英文/跨语言违规词（best、number one、cure、guaranteed、
+> WhatsApp 等）**尚未收录进规则层**；英文样例在规则层基线记为设计内缺口，交 LLM 语义 / 红队层裁决。
+> 规则层不硬塞英文同义词表，避免误报；英文词表属待办，需逐条对齐法规与平台规则后再补。
 
 ### 字段
 - `id`、`text`、`industry`、`platform`
@@ -31,7 +35,8 @@ python scripts/run_model_crosscheck.py # 配 key 在线；双模型交叉对比�
 新增用例：直接往对应 jsonl 追加一行；规则改动后 CI 会自动重跑并把新 BENCHMARK 提交回仓库。
 
 ## 接入 LLM 层红队（P1）
-- `promptfooconfig.yaml`：providers 已指向硅基流动主力/兜底双模型（key 走 `SILICONFLOW_API_KEY` 环境变量）；`npm i -g promptfoo` 后 `promptfoo eval -c evals/promptfooconfig.yaml`，对 LLM 改写/变体识别做广度红队与回归。双模型基础交叉已由 `scripts/run_model_crosscheck.py` 覆盖，无需 npm。
+- `promptfooconfig.yaml`：providers 已指向硅基流动主力/兜底双模型（key 走 `SILICONFLOW_API_KEY` 环境变量）；`npm i -g promptfoo` 后 `promptfoo eval -c evals/promptfooconfig.yaml`，对 LLM 改写/变体识别做广度红队与回归。配置内 `tests` 已固化与 `redteam.jsonl` / `semantic.jsonl` 对齐的断言骨架：抗接管样本用 `not-contains` 拦违规核心词、`contains-any` 校验风险立场未被剥夺；语义召回样本用 `llm-rater` 模板判定。双模型基础交叉已由 `scripts/run_model_crosscheck.py` 覆盖，无需 npm。
 - `deepteam.config.example.json`：DeepTeam（`pip install deepeval`）配置骨架，OWASP LLM Top10 映射，产出 `reports/SECURITY.md`。
-- 深度多轮可再加微软 **PyRIT**、模型级广度扫描用 **Garak**。
+- 深度多轮可再加微软 **PyRIT**、模型级广度扫描用 **Garak**；二者属重型依赖，不进 stdlib 主仓，建议隔离环境运行。
 - redteam.jsonl 里的拆字/emoji 用例预期会绕过纯规则层——这正是 LLM 语义层 + 输入归一化存在的理由，也是你对外讲"规则是硬底线、LLM 补变体"的证据。
+- 待在线复跑：新增的 r13–r20（英文注入/越狱/导流/指令覆盖）与 s09–s14（英文暗示、化妆品疗效暗示）尚未配 key 跑在线快照；补跑前不得对外宣称其阻断/召回结果。
