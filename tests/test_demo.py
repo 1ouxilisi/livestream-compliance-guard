@@ -151,6 +151,49 @@ async def test_demo_rate_limited():
 
 
 @pytest.mark.asyncio
+async def test_demo_panel_defaults_are_valid():
+    """默认值与下拉项必须是引擎认识的枚举，否则买家一点就 400。"""
+    import re
+
+    from lcg.demo_page import DEMO_HTML
+    from lcg.models import INDUSTRIES, PLATFORMS
+
+    def options(select_id: str) -> set:
+        block = re.search(r'<select id="%s">(.*?)</select>' % select_id,
+                          DEMO_HTML, re.S)
+        assert block, f"missing select #{select_id}"
+        return set(re.findall(r'value="([^"]+)"', block.group(1)))
+
+    industry_opts = options("industry")
+    platform_opts = options("platform")
+    assert industry_opts <= set(INDUSTRIES), industry_opts - set(INDUSTRIES)
+    assert platform_opts <= set(PLATFORMS), platform_opts - set(PLATFORMS)
+    assert "general" in industry_opts and "douyin" in platform_opts
+
+
+@pytest.mark.asyncio
+async def test_demo_every_option_is_accepted_by_engine():
+    """把下拉里的每个组合都真打一遍：页面能给的值，服务端必须接得住。"""
+
+    import httpx
+
+    from lcg.models import INDUSTRIES, PLATFORMS
+
+    server, task, port = await _serve()
+    try:
+        async with httpx.AsyncClient() as client:
+            for industry in INDUSTRIES:
+                for platform in PLATFORMS:
+                    r = await client.post(
+                        f"http://127.0.0.1:{port}/demo/analyze",
+                        json={"text": "Guaranteed results, no side effects.",
+                              "industry": industry, "platform": platform})
+                    assert r.status_code == 200, (industry, platform, r.text)
+    finally:
+        await _stop(server, task)
+
+
+@pytest.mark.asyncio
 async def test_demo_stays_public_when_token_configured():
     """配了 Bearer 后 /mcp 要鉴权，但演示页必须仍然对买家开放。"""
     import httpx

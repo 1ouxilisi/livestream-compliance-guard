@@ -1,0 +1,18 @@
+# Render Blueprint —— 公网部署公开演示页（/demo 与 /healthz 开放，/mcp 需 Bearer）
+# 用法：Render 控制台 → New → Blueprint → 选本仓库 → 自动读这份文件。
+# 免费实例闲置 15 分钟会休眠，首次访问有 30–60s 冷启动；买家体验要求高时升到 Starter。
+services:
+  - type: web
+    name: lcg-demo
+    runtime: docker
+    dockerfilePath: ./deploy/Dockerfile
+    plan: free
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: LCG_HTTP_PORT
+        value: "8000"
+      # 公开演示不需要模型 key：/demo/analyze 固定走规则层，不会被刷出 token 成本。
+      # 想同时开放 /mcp 时才在 Render 后台填这个 Secret，别写进仓库。
+      - key: LCG_BEARER_TOKEN
+        sync: false

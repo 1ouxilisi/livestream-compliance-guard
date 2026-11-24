@@ -83,15 +83,14 @@ DEMO_HTML = r"""<!DOCTYPE html>
     <select id="industry">
       <option value="general">general</option>
       <option value="food">food</option>
-      <option value="health">health</option>
-      <option value="beauty">beauty</option>
-      <option value="education">education</option>
+      <option value="cosmetics">cosmetics</option>
+      <option value="jadeite">jadeite (jade / jewelry)</option>
     </select>
     <select id="platform">
       <option value="douyin">douyin</option>
-      <option value="taobao">taobao</option>
       <option value="kuaishou">kuaishou</option>
-      <option value="amazon">amazon</option>
+      <option value="shipinhao">shipinhao</option>
+      <option value="taobao">taobao</option>
     </select>
     <button class="primary" id="go">Run check</button>
     <span class="hint" id="cnt">0 / 2000</span>
