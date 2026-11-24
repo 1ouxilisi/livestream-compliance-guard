@@ -2,7 +2,7 @@
 
 > Real-time banned-word / absolute-term / false-claim detection for **live-commerce** hosts, AI shopping agents and digital-human sellers — built on China Advertising Law plus major platform rules. A shared, language-neutral rule core ships built-in **jadeite** rules and pluggable **food/health-food** and **cosmetics** lexicons.
 
-[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.8.0-orange)]()
+[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.9.0-orange)]()
 
 Repository: `github.com/1ouxilisi/livestream-compliance-guard`
 
@@ -80,8 +80,8 @@ The rule source of truth is the core bundle `rules/rules.v1.json` plus plugin bu
 - Industries: `jadeite` (built-in, scope-isolated), `food`, `cosmetics` (external plugins), `general` otherwise. Compliant phrasing is deliberately allowed (e.g. registered health-food functions with "this product cannot replace medicine", ordinary cosmetic effects, registered special claims).
 - Two-layer normalization: equal-length layer (full-width to half-width, lowercase, common traditional→simplified) and compact layer (strip spaces / middle dots / emoji / slash / pipe / backslash blockers); ordinal disambiguation for "first"; diversion regex requires a signal word plus digits; replacements are rechecked after rewriting (closed loop).
 - Rule layer: **87 offline cases, 100% pass** (100% high-risk recall, 0% clean false positives; 37 benign, 50 adversarial). Performance: ~1.93 ms/sentence average, P95 ~2.72 ms, ~518 sentences/s on this machine (relative comparison only).
-- LLM layer: OpenAI-compatible (primary Qwen/Qwen3-14B, fallback DeepSeek-V3); historical online snapshot **40/40**. Online results depend on account balance and model version — see the latest snapshot in `reports/LLM_EVAL.md`; degrades to rules-only with no key. Token usage (input/output/total) is collected and passed through; cost can be estimated from configured per-MTok prices.
-- **219 unit tests** passing. See [`reports/PERF.md`](reports/PERF.md), [`reports/LLM_EVAL.md`](reports/LLM_EVAL.md), [`reports/VARIANT_BASELINE.md`](reports/VARIANT_BASELINE.md), [`reports/SECURITY.md`](reports/SECURITY.md).
+- LLM layer: OpenAI-compatible (primary Qwen/Qwen3-14B, fallback DeepSeek-V3); online snapshot **59/59** (recall 8/8, red-team 14/14, zero false-positive 37/37); two-model crosscheck Qwen3-14B 20/20, DeepSeek-V3 18/20; output fluctuates with model version. Online results depend on account balance and model version — see the latest snapshot in `reports/LLM_EVAL.md`; degrades to rules-only with no key. Token usage (input/output/total) is collected and passed through; cost can be estimated from configured per-MTok prices.
+- **219 unit tests** passing. See [`reports/PERF.md`](reports/PERF.md), [`reports/LLM_EVAL.md`](reports/LLM_EVAL.md), [`reports/MODEL_CROSSCHECK.md`](reports/MODEL_CROSSCHECK.md), [`reports/VARIANT_BASELINE.md`](reports/VARIANT_BASELINE.md), [`reports/SECURITY.md`](reports/SECURITY.md).
 
 ## Boundaries
 
@@ -98,7 +98,7 @@ Docs: [Compliance mapping](docs/COMPLIANCE_MAPPING.md) · [Scope & boundaries](d
 
 ## Roadmap
 
-- [x] Real LLM integration (Chinese): homophone/innuendo recall + injection/jailbreak resistance + full-sentence rewrite (v0.6.0, snapshot 40/40); English and multi-model scaled red-team (promptfoo/DeepTeam) still P1.
+- [x] Real LLM integration (Chinese): homophone/innuendo recall + injection/jailbreak resistance + full-sentence rewrite (v0.6.0, snapshot 59/59); two-model crosscheck in `reports/MODEL_CROSSCHECK.md`. English/cross-lingual and broad promptfoo/DeepTeam red-team still P1.
 - [ ] Real-time ASR ingestion: speech-to-text → per-sentence live alerting.
 - [x] More industries (plugin): food/health-food, cosmetics (v0.5.0).
 - [ ] More industries: medical device, education, finance, alcohol (regulations verified item by item first).

@@ -2,14 +2,34 @@
   "meta": {
     "package": "crossborder",
     "format": "lcg-plugin/1",
-    "language": "en-US",
+    "language": "mixed-en-zh",
     "version": "v0.0.0-placeholder",
     "industry": "crossborder",
     "status": "placeholder",
     "pending_legal_review": true,
     "rule_count": 0,
     "replacement_count": 0,
-    "note": "Placeholder skeleton with no rules yet. Cross-border / English-language compliance (e.g. TikTok Shop, Amazon Live) depends on target-market regulations and platform policies; legal review and sourced rules are required before filling this pack. Do not use it as a compliance conclusion.",
+    "note": "法务复核工作底稿（未收录任何判定规则，rules 保持为空，文件以下划线开头不被引擎加载）。跨境 / 英文直播面向不同目标站点，适用当地消费者保护、广告与平台政策，不能直接套用国内《广告法》口径；须先确定目标市场并由当地法务 / 母语复核后再填充。当前不得据此对外作合规结论。",
+    "risk_categories": [
+      "目标市场绝对化 / 误导性用语（best, #1, guaranteed 等，按当地法规定性）",
+      "功效、疗效、医疗暗示宣称",
+      "价格、折扣、原产地、认证与成分误导",
+      "平台禁限售商品 / 资质类目",
+      "本地语言表达与文化合规（含谐音、俚语、缩略语）"
+    ],
+    "candidate_sources": [
+      { "law": "EU Unfair Commercial Practices Directive (2005/29/EC)", "article": "", "url": "", "status": "to_verify" },
+      { "law": "US FTC Advertising Guides / Truth in Advertising", "article": "", "url": "", "status": "to_verify" },
+      { "law": "目标站点平台政策（TikTok Shop / Amazon Live / eBay 等，以站点最新版本为准）", "article": "", "url": "", "status": "to_verify" },
+      { "law": "目标市场产品认证与标签法规（CE / FDA / UKCA 等，按品类确认）", "article": "", "url": "", "status": "to_verify" }
+    ],
+    "review_checklist": [
+      "先确定目标站点、目标语言与适用市场法规，不同站点口径不同",
+      "绝对化用语、疗效宣称、价格与原产地表述按当地法规与平台政策定性",
+      "英文 / 小语文案由母语使用者与当地法务复核，识别谐音、俚语与缩略语变体",
+      "核对目标平台禁限售清单与所需资质认证",
+      "完成目标市场法务与母语复核后，再逐条回填 words/patterns 并去除文件名下划线前缀"
+    ],
     "sources": []
   },
   "rules": [],

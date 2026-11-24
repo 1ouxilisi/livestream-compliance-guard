@@ -7,7 +7,7 @@
     "industry": "example",
     "rule_count": 1,
     "replacement_count": 1,
-    "note": "行业插件模板（本文件以下划线开头，不会被规则引擎加载）。复制本文件为 <industry>.json，把 industry/package/scope 改为目标行业，逐条核实法条与平台规则后再填写 words/patterns；强监管行业（医疗、金融、教培、酒水等）上线前须经法务复核。",
+    "note": "行业插件模板（本文件以下划线开头，不会被规则引擎加载）。复制本文件为 <industry>.json，把 industry/package/scope 改为目标行业，逐条核实法条与平台规则后再填写 words/patterns；强监管行业（医疗、金融、教培、酒水等）上线前须经法务复核。法务未复核前的占位底稿可在 meta 内用 risk_categories / candidate_sources / review_checklist 记录待核方向，保持 status=placeholder、pending_legal_review=true、rules=[]，不得回填可执行判罚词。",
     "sources": [
       {
         "law": "对应法律/行政法规名称",

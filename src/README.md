@@ -58,6 +58,6 @@ src/lcg/
 - 改规则后先 `python scripts/export_rules.py` 规范化，再跑全部验证。
 
 ## P1 待办
-- LLM 语义层已真实联调（中文）：融合/降级/改写/预算/缓存已落地，在线评测 40/40 见 `reports/LLM_EVAL.md`。归一化仍待增强：中文标点插字、emoji 替字映射、谐音/拼音、拆字还原（谐音/拆字归 LLM）；规模化红队（promptfoo/DeepTeam，多模型/跨语言）待补。
+- LLM 语义层已真实联调（中文）：融合/降级/改写/预算/缓存已落地，在线评测 59/59 见 `reports/LLM_EVAL.md`，双模型交叉见 `reports/MODEL_CROSSCHECK.md`。归一化仍待增强：中文标点插字、emoji 替字映射、谐音/拼音、拆字还原（谐音/拆字归 LLM）；规模化红队（promptfoo/DeepTeam，多模型/跨语言）待补。
 - 远程部署与计费：把 `server_http` 部署到公网、接 OAuth/多租户与网关计量（见 deploy/README.md）。
 - 法条条款号/版本/URL 元数据深化（B6）。
