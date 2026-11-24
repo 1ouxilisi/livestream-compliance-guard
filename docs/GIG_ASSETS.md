@@ -41,7 +41,7 @@
 | S3 | 批量明细 CSV | 表格软件打开 `samples/batch_report.csv` | 序号 / 主播 / 话术 / 风险级别 / 命中类别 | 附图：逐条判定明细 |
 | S4 | 改写前后对照 | 表格软件打开 `samples/rewrite_before_after.csv` | 原文 → 替换映射 → 改写后全文 → 复检 clean | 附图：改写闭环 |
 | S5 | 反馈导出样例 | 表格软件打开 `samples/feedback_example.csv` | 误报 / 漏报 / 存疑三类反馈记录 | 附图：反馈闭环（B 档能力，如实标注本地留痕） |
-| S6 | 信任凭证 | `reports/BENCHMARK.md`、`reports/LLM_EVAL.md`、`reports/MODEL_CROSSCHECK.md`、`reports/PERF.md` 关键段截图 | 87/87、73/73、双模型交叉、性能基准 | 附图：可复现评测背书 |
+| S6 | 信任凭证 | `reports/BENCHMARK.md`、`reports/LLM_EVAL.md`、`reports/MODEL_CROSSCHECK.md`、`reports/PERF.md` 关键段截图 | 95/95、73/73、双模型交叉、性能基准 | 附图：可复现评测背书 |
 
 ### 2.2 录屏（演示视频，3.5–5 分钟；可剪 60s 短片）
 
@@ -62,7 +62,7 @@ python scripts/demo_walkthrough.py --json      # 需要结构化输出画面时
 | 5 | 整场批量扫描时间线与 high 计数 | S2 / S3 |
 | 6 | 改写 + 复检闭环（复检不 clean 不采用） | S4 |
 | 7 | LLM 融合 / 自动降级（可选，需 key；可只录 `rules_only` 降级路径） | mode / status / tokens |
-| 8 | 性能与测试基线（约 1.93ms/句、P95 2.72ms、约 518 句/秒；87/87；219 单测） | S6 |
+| 8 | 性能与测试基线（约 1.93ms/句、P95 2.72ms、约 518 句/秒；95/95；219 单测） | S6 |
 | 9 | 批量聚合 + 反馈闭环 + 可脱敏审计样例 | S5 |
 
 > LLM 融合段为可选：若不想耗额度，录离线降级路径即可；在线结果随模型版本与余额波动，视频与简介中须注明。

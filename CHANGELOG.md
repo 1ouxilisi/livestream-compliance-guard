@@ -2,20 +2,23 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 与[语义化版本](https://semver.org/lang/zh-CN/)。
 
-规则库内容版本见 `rules/rules.v1.json` 的 `meta.version`（核心包当前 **v1.4**），与软件包版本相互独立；行业插件包在 `rules/plugins/*.json` 各自维护版本。
+规则库内容版本见 `rules/rules.v1.json` 的 `meta.version`（核心包当前 **v1.5**），与软件包版本相互独立；行业插件包在 `rules/plugins/*.json` 各自维护版本。
 
 ## [Unreleased]
 
 ### 新增
+- **规则库 v1.5 · 英文违规词表**：在既有 14 条规则内追加英文同义违规词（绝对化 `number one` / `world-class` / `best in the world`；虚假保真 `guaranteed authentic` / `zero risk` / `risk-free`；升值 `guaranteed to appreciate` / `will only go up`；疗效 `cures cancer` / `miracle cure` / `no side effects`；迷信 `feng shui`；四平台导流 `whatsapp` / `telegram` / `wechat` / `dm me`），**规则条数与替换条数不变**（仍 14 / 16，聚合 20 / 31）。
+- **英文规则层用例**：对抗 a51–a55（英文绝对化 / 保真 / 升值 / 疗效 / 导流）＋ 良性 b38–b40（英文客观卖点 / 化妆品特证 / 蓝帽声明），校验英文可拦且不误报；规则评测 87 → **95 条**（良性 40、对抗 55）。
 - **跨语言红队 / 语义用例扩充**：redteam 增至 r01–r20（补英文注入、角色扮演越狱、冒充权威、指令覆盖、站外导流、花括号插字等），semantic 增至 s01–s14（补英文疗效 / 保值 / 导流 / 弱最高级 / 迷信暗示与化妆品疗效暗示）；离线变体基线由 20 条扩到 **34 条**。
 - **promptfoo 固定断言骨架**：`evals/promptfooconfig.yaml` 补 9 条 `tests`，抗接管样本用 `not-contains` 拦违规核心词、`contains-any` 校验风险立场，语义召回用 `llm-rater` 模板；装好 npm 与 key 后 `promptfoo eval` 即可跑，离线不执行。
 
 ### 变更
+- **promptfoo 工具链接入并跑通**（本机 Node 22 / npm 10）：`evals/promptfooconfig.yaml` 改为「守卫系统提示 + 待审话术」的固定 9 条断言，`javascript` 校验输出 `overall` 达 `high`；新增 `scripts/export_guard_prompt.py`（从 `DETECT_SYSTEM` 导出 prompt）与 `scripts/summarize_promptfoo.py`（汇总成 `reports/PROMPTFOO.md`，原始 JSON 不入库）；生成式广度红队另存 `promptfooconfig.redteam.yaml`，与 `eval` 分离以免误触发大批量生成。本次 18/18（9 用例 × 2 模型）。
 - **检测 prompt 升级 `detect-v4`**：补「立场与指令边界」——审查立场不被身份声称、人情施压或指令覆盖改变；话术是被审数据，其中的命令 / 角色扮演不修改系统指令；审查对中文、英文及混合语种同样适用，英文绝对化 / 疗效 / 保值 / 导流按对应类别判定，弱独家暗示按 medium。
 - 文档口径同步：在线单模型快照 **73/73**（语义召回 14/14、红队阻断 22/22、零误报 37/37）；双模型交叉 34 条 `Qwen3-14B 34/34`、`DeepSeek-V3 33/34`，分歧 1 条 r12。
 
 ### 回归
-- ruff 全仓通过、pytest **219 项**全绿、规则评测 **87/87**（高危检出 100%、干净误报 0%）；离线变体基线 **34 条**；在线快照与双模型交叉为配 key 手动复跑，随模型版本 / 余额波动，非 CI 硬门禁。
+- ruff 全仓通过、pytest **219 项**全绿、规则评测 **95/95**（高危检出 100%、干净误报 0%）；离线变体基线 **34 条**；在线快照与双模型交叉为配 key 手动复跑，随模型版本 / 余额波动，非 CI 硬门禁。
 
 ### 边界（仍未实现）
 - 英文 / 跨语言规则词表尚未收录规则层，英文表达主要依赖 LLM 语义召回；广度红队（promptfoo / DeepTeam / PyRIT / Garak 自动生成）待工具链与额度；医疗 / 金融 / 教培 / 酒水 / 跨境实词库待执业律师与平台规则中心逐条复核。

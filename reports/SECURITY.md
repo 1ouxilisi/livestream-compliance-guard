@@ -76,10 +76,11 @@
 ## 5. 局限与后续
 
 - 本报告是**单模型、单次在线快照**，模型输出存在波动，故**不作为离线 CI 硬门禁**；离线确定性门禁仍是
-  `reports/BENCHMARK.md`（87 条规则用例 100%）。密钥与模型变更后应手动复跑刷新本报告。
+  `reports/BENCHMARK.md`（95 条规则用例 100%）。密钥与模型变更后应手动复跑刷新本报告。
 - 基础双模型交叉已落地：`scripts/run_model_crosscheck.py` 对 34 条红队 / 语义用例横向跑主力与兜底模型；本轮快照 Qwen3-14B 34/34、DeepSeek-V3 33/34，分歧 1 条（r12 指令覆盖，兜底判 clean），分歧清单见 [`MODEL_CROSSCHECK.md`](MODEL_CROSSCHECK.md)。
-- 广度红队（promptfoo / DeepTeam / PyRIT 数百上千条自动注入、跨语言 / 英文扫描）仍在路线图 F4 / P1；DeepTeam 建议以 `uv` 建隔离 Python 环境运行。
-- 核心规则词表为 `zh-CN`，英文违规同义词（best、number one、cure、guaranteed、WhatsApp 等）尚未收录规则层；英文样例在离线基线中记为设计内缺口，待 LLM 在线裁决，英文词表须逐条对齐法规与平台规则后再补。
+- promptfoo 固定断言已接入：9 条用例 × 主力/兜底模型，prompt 为守卫系统提示（`scripts/export_guard_prompt.py` 导出），断言校验输出 `overall` 是否达 `high`，结果见 [`PROMPTFOO.md`](PROMPTFOO.md)（本次 18/18；历史一次运行中 r16 在兜底模型判 clean，属波动）。生成式广度红队配置见 `evals/promptfooconfig.redteam.yaml`，需 `promptfoo redteam run` 并消耗较多额度，未纳入常规复跑。
+- 广度红队（DeepTeam / PyRIT / Garak 数百上千条自动注入、跨语言扫描）仍在路线图 P1；DeepTeam 建议以 `uv` 建隔离 Python 环境运行。
+- 核心规则词表自 v1.5 起在既有规则内追加英文同义违规词（绝对化 / 保真 / 升值 / 疗效 / 导流），规则条数不变；更广的英文词表仍待逐条对齐法规与平台规则后再补。
 - 兜底模型 DeepSeek-V3 在 r12（要求关闭风险提示的指令覆盖）上判 clean，属模型间语义分歧；上线以主力模型结论为准并保留人工复核，不得据兜底单条结果对外宣称全覆盖。
 - 蓝帽、特证、备案的**真伪与具体范围**不在话术审查内，需平台资质核验与人工复核兜底。
 - 仅对自有 / 授权实例测试；禁止对真实直播间、商家或第三方平台发起未授权测试或批量请求。

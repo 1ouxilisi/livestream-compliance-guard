@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "livestream-compliance-guard-rules",
-    "version": "v1.4",
+    "version": "v1.5",
     "format": "lcg-rules/1",
     "language": "zh-CN",
     "severities": [
@@ -12,7 +12,7 @@
     ],
     "rule_count": 14,
     "replacement_count": 16,
-    "note": "Authoritative language-neutral rule source. Read by Python and TS runtimes; do not hand-edit without bumping version."
+    "note": "Authoritative language-neutral rule source. Read by Python and TS runtimes; do not hand-edit without bumping version. v1.5 在既有规则内追加英文同义违规词（不新增规则条数），英文表达命中与中文同类别同严重度。"
   },
   "rules": [
     {
@@ -51,7 +51,13 @@
         "排名第一",
         "全国第一",
         "百分百",
-        "百分之百"
+        "百分之百",
+        "number one",
+        "number 1",
+        "world-class",
+        "world's best",
+        "best in the world",
+        "top-ranked"
       ],
       "patterns": [
         "100\\s*%",
@@ -105,7 +111,14 @@
         "今天最后",
         "最后一天",
         "清仓最后",
-        "原价"
+        "原价",
+        "100% guaranteed",
+        "risk-free",
+        "zero risk",
+        "no risk",
+        "guaranteed authentic",
+        "authenticity guaranteed",
+        "money-back guarantee"
       ],
       "patterns": [
         "涨[到幅]?\\s*\\d+\\s*倍",
@@ -131,7 +144,12 @@
         "投资首选",
         "买到就是赚到",
         "捡漏",
-        "稳涨"
+        "稳涨",
+        "guaranteed to appreciate",
+        "will only go up",
+        "only goes up",
+        "investment grade",
+        "sure to rise"
       ],
       "patterns": [
         "(升值|保值|涨价)\\s*空间"
@@ -165,7 +183,12 @@
         "镇痛",
         "特效",
         "神效",
-        "药到病除"
+        "药到病除",
+        "cures cancer",
+        "cure cancer",
+        "miracle cure",
+        "cure-all",
+        "no side effects"
       ],
       "patterns": [],
       "tip": "非医疗/保健食品不得宣称疾病治疗或保健功效，删除功效表述。"
@@ -188,7 +211,8 @@
         "磁疗",
         "戴了对身体好",
         "玉石养生",
-        "养人"
+        "养人",
+        "feng shui"
       ],
       "patterns": [],
       "tip": "不得宣传封建迷信或伪科学功效（如玉石养生、开光辟邪），只描述材质与装饰属性。"
@@ -220,7 +244,11 @@
         "截屏加我",
         "扫码",
         "进群",
-        "私下转账"
+        "私下转账",
+        "whatsapp",
+        "telegram",
+        "wechat",
+        "dm me"
       ],
       "patterns": [
         "(?<![0-9a-zA-Z])(微|薇|vx|v)[信心]?\\s*[:：]?\\s*(?=[0-9a-zA-Z]{0,20}[0-9])[0-9a-zA-Z]{5,}"
@@ -244,7 +272,11 @@
         "拉人头",
         "扫码",
         "进群",
-        "私下转账"
+        "私下转账",
+        "whatsapp",
+        "telegram",
+        "wechat",
+        "dm me"
       ],
       "patterns": [
         "(?<![0-9a-zA-Z])(微|薇|vx|v)[信心]?\\s*[:：]?\\s*(?=[0-9a-zA-Z]{0,20}[0-9])[0-9a-zA-Z]{5,}"
@@ -267,7 +299,11 @@
         "好评返现",
         "扫码",
         "进群",
-        "私下转账"
+        "私下转账",
+        "whatsapp",
+        "telegram",
+        "wechat",
+        "dm me"
       ],
       "patterns": [
         "(?<![0-9a-zA-Z])(微|薇|vx|v)[信心]?\\s*[:：]?\\s*(?=[0-9a-zA-Z]{0,20}[0-9])[0-9a-zA-Z]{5,}"
@@ -292,7 +328,11 @@
         "返现",
         "扫码",
         "进群",
-        "私下转账"
+        "私下转账",
+        "whatsapp",
+        "telegram",
+        "wechat",
+        "dm me"
       ],
       "patterns": [
         "(?<![0-9a-zA-Z])(微|薇|vx|v)[信心]?\\s*[:：]?\\s*(?=[0-9a-zA-Z]{0,20}[0-9])[0-9a-zA-Z]{5,}"

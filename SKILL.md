@@ -62,4 +62,4 @@ Use this skill when you need to:
 - Advisory only; the final decision rests with the merchant and the latest official/platform rules. Not legal advice.
 
 ## Version
-v0.9.0 (2026-11) · rule core v1.4 + optional LLM layer · jadeite / general / food / cosmetics · 4 platforms · 6 MCP tools · stdio + HTTP transport.
+v0.9.0 (2026-11) · rule core v1.5 + optional LLM layer · jadeite / general / food / cosmetics · 4 platforms · 6 MCP tools · stdio + HTTP transport.

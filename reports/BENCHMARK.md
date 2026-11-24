@@ -1,11 +1,11 @@
-# BENCHMARK · 直播电商合规守卫 MCP（规则层 核心 v1.4 ＋ 行业插件（cosmetics v1.0、food v1.0））
+# BENCHMARK · 直播电商合规守卫 MCP（规则层 核心 v1.5 ＋ 行业插件（cosmetics v1.0、food v1.0））
 
 - 生成日期：2026-11-24
 - 评测对象：`lcg` 规则引擎（src/lcg；规则源为核心包 rules.v1.json ＋ rules/plugins/*.json 行业插件；根 server.py 为兼容 shim）
-- 规则层用例：87 条（良性 37，对抗 50）
-- **整体通过率：100.0%**（87/87）
-- **高危样本检出率：100.0%**（46/46）
-- **干净样本误报率：0.0%**（0/32，越低越好）
+- 规则层用例：95 条（良性 40，对抗 55）
+- **整体通过率：100.0%**（95/95）
+- **高危样本检出率：100.0%**（51/51）
+- **干净样本误报率：0.0%**（0/35，越低越好）
 - LLM 层红队用例：20 条（注入/越狱，交由 DeepTeam·PyRIT 在 LLM 层裁决）
 - 语义层待跑用例：14 条（谐音/拆字/emoji/暗示，规则层已确认漏检，配 key 后由 LLM 层裁决）
 
@@ -48,6 +48,9 @@
 | b35 | benign | clean | clean | PASS | 0 | 合规售后与运费险承诺，非终身不坏保证，应放行 |
 | b36 | benign | low | low | PASS | 1 | 糯种术语 low 提示，带证书复检合规 |
 | b37 | benign | clean | clean | PASS | 0 | “首批/第一款/第二步”为次序与步骤，序数消歧后应放行 |
+| b38 | benign | clean | clean | PASS | 0 | 英文良性：客观材质卖点，不得误报 |
+| b39 | benign | clean | clean | PASS | 0 | 英文良性：化妆品特证功效 + 肤质描述，不得误报 |
+| b40 | benign | clean | clean | PASS | 0 | 英文良性：蓝帽保健食品法定功能 + 不能代替药物声明，不得误报 |
 | a01 | adversarial | high | high | PASS | 14 | 多重高危叠加 |
 | a02 | adversarial | high | high | PASS | 9 | 绝对化用语+虚构紧迫感 |
 | a03 | adversarial | high | high | PASS | 5 | 迷信伪科学+医疗功效 |
@@ -98,6 +101,11 @@
 | a48 | adversarial | high | high | PASS | 8 | 翡翠无依据货源/保真/收藏必涨诱导，判 high |
 | a49 | adversarial | high | high | PASS | 5 | 化妆品医用级/镇痛/特效医疗作用宣称，判 high |
 | a50 | adversarial | high | high | PASS | 2 | 加群/扫码站外导流，判 high |
+| a51 | adversarial | high | high | PASS | 3 | 英文绝对化：number one / world-class / best in the world，规则层 v1.5 起可拦 |
+| a52 | adversarial | high | high | PASS | 3 | 英文虚假/保真承诺：guaranteed authentic / zero risk / risk-free |
+| a53 | adversarial | high | high | PASS | 2 | 英文升值承诺：guaranteed to appreciate / will only go up |
+| a54 | adversarial | high | high | PASS | 2 | 英文疗效宣称：cures cancer / no side effects |
+| a55 | adversarial | high | high | PASS | 3 | 英文站外导流：whatsapp / telegram / dm me |
 
 > 复现：`python evals/run_evals.py`。本报告由脚本生成，规则或用例变更后在 CI 自动刷新。
 > 仅为合规风险提示，不构成法律意见，以监管机关与平台最新规则为准。

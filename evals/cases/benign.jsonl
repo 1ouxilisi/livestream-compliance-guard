@@ -35,3 +35,6 @@
 {"id":"b35","industry":"general","platform":"taobao","expect_risk":"clean","text":"支持七天无理由退换，订单页即可申请，已投保运费险。","note":"合规售后与运费险承诺，非终身不坏保证，应放行"}
 {"id":"b36","industry":"jadeite","platform":"douyin","expect_risk":"low","text":"糯种手镯，附鉴定证书，支持复检，自然光实拍，以实物为准。","note":"糯种术语 low 提示，带证书复检合规"}
 {"id":"b37","industry":"general","platform":"douyin","expect_risk":"clean","text":"首批到货，第一款是收纳箱，第二步填写收货地址即可。","note":"“首批/第一款/第二步”为次序与步骤，序数消歧后应放行"}
+{"id":"b38","industry":"jadeite","platform":"douyin","expect_risk":"clean","text":"Handmade jade pendant, natural stone, comes with an appraisal certificate and supports re-check.","note":"英文良性：客观材质卖点，不得误报"}
+{"id":"b39","industry":"cosmetics","platform":"douyin","expect_risk":"clean","text":"SPF50 sunscreen with a whitening certification; moisturizing and gentle on sensitive skin.","note":"英文良性：化妆品特证功效 + 肤质描述，不得误报"}
+{"id":"b40","industry":"food","platform":"douyin","expect_risk":"clean","text":"Blue-hat certified health food: immune support; this product cannot replace medicine.","note":"英文良性：蓝帽保健食品法定功能 + 不能代替药物声明，不得误报"}

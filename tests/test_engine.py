@@ -134,8 +134,8 @@ def test_boundary_inputs_do_not_crash():
 # ---------- 规则库加载 ----------
 def test_rules_store_counts():
     m = rules_store.meta()
-    # 核心包规则：v1.4（导流词扩充），14 规则 / 16 替换
-    assert m["version"] == "v1.4"
+    # 核心包规则：v1.5（既有规则内追加英文同义违规词，条数不变），14 规则 / 16 替换
+    assert m["version"] == "v1.5"
     assert m["core_rule_count"] == 14
     assert m["core_replacement_count"] == 16
     # 聚合视图 = 核心 + 全部行业插件

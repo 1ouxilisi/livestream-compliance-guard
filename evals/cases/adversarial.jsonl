@@ -48,3 +48,8 @@
 {"id":"a48","industry":"jadeite","platform":"douyin","expect_risk":"high","expect_any":["一手货源","矿口直供","保真","收藏必涨"],"text":"这块一手货源，矿口直供，绝对保真，收藏必涨。","note":"翡翠无依据货源/保真/收藏必涨诱导，判 high"}
 {"id":"a49","industry":"cosmetics","platform":"douyin","expect_risk":"high","expect_any":["医用","镇痛","特效"],"text":"医用级精华，镇痛舒缓，特效修复受损肌肤。","note":"化妆品医用级/镇痛/特效医疗作用宣称，判 high"}
 {"id":"a50","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["加群","扫码"],"text":"加群领取优惠券，扫码进入粉丝团。","note":"加群/扫码站外导流，判 high"}
+{"id":"a51","industry":"jadeite","platform":"douyin","expect_risk":"high","text":"This is the number one jade pendant, world-class craftsmanship, best in the world.","note":"英文绝对化：number one / world-class / best in the world，规则层 v1.5 起可拦"}
+{"id":"a52","industry":"general","platform":"douyin","expect_risk":"high","text":"Guaranteed authentic jadeite, zero risk and risk-free purchase.","note":"英文虚假/保真承诺：guaranteed authentic / zero risk / risk-free"}
+{"id":"a53","industry":"jadeite","platform":"douyin","expect_risk":"high","text":"It is guaranteed to appreciate, the price will only go up.","note":"英文升值承诺：guaranteed to appreciate / will only go up"}
+{"id":"a54","industry":"general","platform":"douyin","expect_risk":"high","text":"This supplement cures cancer and has no side effects.","note":"英文疗效宣称：cures cancer / no side effects"}
+{"id":"a55","industry":"general","platform":"douyin","expect_risk":"high","text":"Add me on WhatsApp or Telegram, dm me for the private price.","note":"英文站外导流：whatsapp / telegram / dm me"}

@@ -77,9 +77,9 @@ python scripts/demo_walkthrough.py
 
 ### 镜头 8 · 性能与测试基线（3:40–4:00）
 - **命令**：演示脚本第 8 节性能快照；再依次跑 `python evals/run_evals.py` 与 `python -m pytest -q`。
-- **预期画面**：规则层本机约 1.93ms/句、P95 约 2.72ms、约 518 句/秒；规则评测 87/87；单测 219 项通过。
-- **口播（中）**：规则层是零第三方依赖的纯本地判断，本机单句约两毫秒；离线评测 87 条全绿、高危检出 100%、干净误报 0%，单元测试 219 项通过。
-- **EN**：The rule core runs locally with zero third-party dependencies, about two milliseconds per sentence on this machine. Offline evals pass 87/87 with 100% high-risk recall and zero clean false positives; 219 unit tests pass.
+- **预期画面**：规则层本机约 1.93ms/句、P95 约 2.72ms、约 518 句/秒；规则评测 95/95；单测 219 项通过。
+- **口播（中）**：规则层是零第三方依赖的纯本地判断，本机单句约两毫秒；离线评测 95 条全绿、高危检出 100%、干净误报 0%，单元测试 219 项通过。
+- **EN**：The rule core runs locally with zero third-party dependencies, about two milliseconds per sentence on this machine. Offline evals pass 95/95 with 100% high-risk recall and zero clean false positives; 219 unit tests pass.
 
 ### 镜头 9 · 批量聚合与反馈闭环（4:00–4:15，离线）
 - **命令**：演示脚本第 9 节（批量聚合 · 输入适配 · 反馈闭环 · 审计事件）；反馈写临时 JSONL、审计仅构造样例，不落业务文件。
@@ -122,7 +122,7 @@ python -m pytest -q                         # 单元测试
 | 0:13–0:26 | 叠加违规句判 🔴 `high`，逐条列命中类别 / 命中词 / 依据 / 建议 | 同一句话叠了绝对化用语、升值承诺、迷信功效和站外导流，规则逐条命中，每条挂依据提示和可执行的改写建议。 | One sentence stacks absolute terms, investment promises, superstition and diversion. Each hit is flagged with its basis and an actionable fix. | high · category · matched term · basis · rewrite |
 | 0:26–0:35 | 全角 / 插空格 / emoji 阻断归一化命中；食品、化妆品插件 | 全角字符、插空格、emoji 阻断都能归一化识别；食品、化妆品是可插拔词库，加一个行业只放一份 JSON，不动引擎。 | Full-width chars, inserted spaces and emoji-obscured contacts are normalized and caught. Industry packs are pluggable — one JSON, no engine change. | normalization · pluggable lexicon |
 | 0:35–0:46 | 整场时间线聚合；原文 → 替换 → 改写 → 复检 `clean` | 整场逐句批量扫描，输出风险分布和待整改清单；命中词给安全替换，改写后再次复检，通过才采用，否则转人工复核。 | A whole stream is scanned segment by segment with a risk distribution and remediation list. Rewrites are re-checked and adopted only if clean. | batch scan · rewrite → re-check → clean |
-| 0:46–0:60 | 评测 87/87、219 单测、性能快照；回到 README 仓库地址 | 离线评测 87 条全绿、高危检出 100%、干净样本零误报，219 项单测通过，规则层本机单句约两毫秒。它只做风险提示和改写建议，不构成法律意见；项目开源在 GitHub。 | Offline evals pass 87/87 with 100% high-risk recall and zero clean false positives; 219 unit tests pass; the rule core runs about two milliseconds per sentence locally. It gives risk hints and rewrites, not legal advice. Open source on GitHub. | 87/87 · 219 tests · ~2ms/sentence · not legal advice |
+| 0:46–0:60 | 评测 95/95、219 单测、性能快照；回到 README 仓库地址 | 离线评测 95 条全绿、高危检出 100%、干净样本零误报，219 项单测通过，规则层本机单句约两毫秒。它只做风险提示和改写建议，不构成法律意见；项目开源在 GitHub。 | Offline evals pass 95/95 with 100% high-risk recall and zero clean false positives; 219 unit tests pass; the rule core runs about two milliseconds per sentence locally. It gives risk hints and rewrites, not legal advice. Open source on GitHub. | 95/95 · 219 tests · ~2ms/sentence · not legal advice |
 
 ### 6.1 短片口径备注
 

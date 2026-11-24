@@ -31,6 +31,9 @@ Thumbs.db
 .vscode/
 
 # 说明：reports/BENCHMARK.md 与 reports/SECURITY.md 是对外信任凭证，需要提交，不在此忽略。
+# promptfoo 原始输出体积大且含完整模型原文，不入库；入库的是汇总报告 reports/PROMPTFOO.md。
+reports/PROMPTFOO_FIXED.json
+reports/_smoke.json
 
 # ===== 内部规划 / 上架台账（私有备查，不入库、不公开）=====
 *上架物料包*.md
