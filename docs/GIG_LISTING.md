@@ -6,15 +6,17 @@
 
 ## 1. Title candidates
 
+> 定稿主标题、备选与素材清单见 [`GIG_ASSETS.md`](GIG_ASSETS.md)。
+
 **English**
-- `Custom content moderation MCP: banned words, prohibited claims and rewrite checks`
+- ⭐ PRIMARY: `Custom content moderation MCP: banned words, prohibited claims and safe rewrite for e-commerce scripts`
 - `Policy compliance filter for scripts, product copy and replies with safe rewrite`
 - `Deterministic rule-based content safety checker integrated as an MCP tool for your agent`
 - `I will build a live-commerce compliance guard MCP for banned words, claims and diversion`
 - `I will deliver a pluggable rule lexicon + optional LLM review for e-commerce scripts`
 
 **中文（备用）**
-- `直播话术合规筛查与改写：极限词 / 虚假宣传 / 升值承诺 / 医疗功效 / 站外导流检测`
+- ⭐ PRIMARY: `直播话术合规筛查与改写：极限词 / 虚假宣传 / 升值承诺 / 医疗功效 / 站外导流检测`
 
 ## 2. One-line summary
 
