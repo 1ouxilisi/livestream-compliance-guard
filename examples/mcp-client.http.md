@@ -20,8 +20,8 @@ $env:LCG_BEARER_TOKEN='sk-xxx'; python -m lcg.server_http
 ## 2. 健康检查（无需鉴权）
 ```bash
 curl -s http://localhost:8000/healthz
-# {"status":"ok","service":"livestream-compliance-guard","version":"0.5.0",
-#  "rules_version":"v1.3","rule_count":20}
+# {"status":"ok","service":"livestream-compliance-guard","version":"0.9.0",
+#  "rules_version":"v1.4","rule_count":20}
 ```
 
 ## 3. MCP 客户端配置（URL / Token 按部署替换）
