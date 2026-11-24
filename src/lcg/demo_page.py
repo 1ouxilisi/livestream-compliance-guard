@@ -150,12 +150,15 @@ DEMO_HTML = r"""<!DOCTYPE html>
       html+='<div class="card"><div class="hint" style="margin-bottom:8px">Suggested rewrite — '+
         esc(d.rewrite.rewrite_mode)+', recheck: <strong style="color:'+
         (color[d.rewrite.rewritten_risk]||'var(--dim)')+'">'+esc(d.rewrite.rewritten_risk)+
-        '</strong></div><div class="rw">'+esc(d.rewrite.rewritten)+'</div></div>';
+        '</strong></div><div class="rw">'+esc(d.rewrite.rewritten)+'</div>'+
+        '<div class="meta">Replacement text is taken verbatim from the rule pack\'s '+
+        'replacement table, so every edit stays traceable to a rule — it is not an '+
+        'LLM-smoothed sentence. The delivered version adds an optional LLM rewrite pass on top.</div></div>';
     } else {
       html+='<div class="card hint">Rewrite skipped: input is already clean for this rule pack.</div>';
     }
 
-    html+='<div class="meta">rules v'+esc(d.rules_version)+' · '+esc(d.rule_count)+
+    html+='<div class="meta">rules '+esc(d.rules_version)+' · '+esc(d.rule_count)+
       ' rules · engine '+esc(d.version)+' · '+esc(d.elapsed_ms)+' ms</div>';
     out.innerHTML=html;
   }
