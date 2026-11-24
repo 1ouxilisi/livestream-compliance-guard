@@ -110,3 +110,23 @@ python evals/run_evals.py                   # 规则层评测（BENCHMARK.md）
 python scripts/bench_perf.py                # 性能与成本基准（PERF.md）
 python -m pytest -q                         # 单元测试
 ```
+
+## 6. 60 秒短片口播逐字稿（Fiverr / Upwork 附图视频）
+
+> 全程可用 `python scripts/demo_walkthrough.py --offline` 离线录制，不耗模型额度；背书段数字以 `reports/` 与 `pytest` 实际输出为准。关键级别词（high / medium / low / clean）与 `mode` 上字幕，方便静音观看。
+
+| 时段 | 画面 | 中文口播 | EN voiceover | 字幕要点 |
+|---|---|---|---|---|
+| 0:00–0:05 | README 标题 + 6 个 MCP 工具表 | 这是一个直播电商合规守卫 MCP，话术发出去之前，先把极限词、虚假宣传、升值承诺、医疗功效和站外导流拦下来。 | A compliance-guard MCP for live commerce — it catches banned words, false claims, investment promises, medical claims and off-platform diversion before a script goes out. | compliance guard MCP · pre-publication check |
+| 0:05–0:13 | 三条合规话术判 `clean` / `low` | 先看正常话术——普通食品口感、化妆品保湿、带证书支持复检的翡翠，都放行，或只给低风险术语提示，不误伤。 | Legitimate scripts pass: food descriptions, moisturizing claims and certified jadeite are released, or flagged only as low-risk hints. | zero false positives on clean samples |
+| 0:13–0:26 | 叠加违规句判 🔴 `high`，逐条列命中类别 / 命中词 / 依据 / 建议 | 同一句话叠了绝对化用语、升值承诺、迷信功效和站外导流，规则逐条命中，每条挂依据提示和可执行的改写建议。 | One sentence stacks absolute terms, investment promises, superstition and diversion. Each hit is flagged with its basis and an actionable fix. | high · category · matched term · basis · rewrite |
+| 0:26–0:35 | 全角 / 插空格 / emoji 阻断归一化命中；食品、化妆品插件 | 全角字符、插空格、emoji 阻断都能归一化识别；食品、化妆品是可插拔词库，加一个行业只放一份 JSON，不动引擎。 | Full-width chars, inserted spaces and emoji-obscured contacts are normalized and caught. Industry packs are pluggable — one JSON, no engine change. | normalization · pluggable lexicon |
+| 0:35–0:46 | 整场时间线聚合；原文 → 替换 → 改写 → 复检 `clean` | 整场逐句批量扫描，输出风险分布和待整改清单；命中词给安全替换，改写后再次复检，通过才采用，否则转人工复核。 | A whole stream is scanned segment by segment with a risk distribution and remediation list. Rewrites are re-checked and adopted only if clean. | batch scan · rewrite → re-check → clean |
+| 0:46–0:60 | 评测 87/87、219 单测、性能快照；回到 README 仓库地址 | 离线评测 87 条全绿、高危检出 100%、干净样本零误报，219 项单测通过，规则层本机单句约两毫秒。它只做风险提示和改写建议，不构成法律意见；项目开源在 GitHub。 | Offline evals pass 87/87 with 100% high-risk recall and zero clean false positives; 219 unit tests pass; the rule core runs about two milliseconds per sentence locally. It gives risk hints and rewrites, not legal advice. Open source on GitHub. | 87/87 · 219 tests · ~2ms/sentence · not legal advice |
+
+### 6.1 短片口径备注
+
+- 不出现客户名、场次名、成交数据；样例均为虚构示例。
+- 性能数字为本机进程内相对测量，不表述为生产 SLA；在线 LLM 融合段不进这一版 60 秒短片。
+- 结尾必须保留「风险提示与改写建议，不构成法律意见」边界；不写「包过审 / 法律背书 / 资质保真 / 识别语音图片」。
+- 成片引用的评测条数、测试项数、性能数字录完后对照 `reports/BENCHMARK.md`、`reports/PERF.md` 与 `pytest` 实际输出再核一遍。
