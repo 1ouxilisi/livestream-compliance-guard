@@ -1,11 +1,11 @@
 # BENCHMARK · 直播电商合规守卫 MCP（规则层 核心 v1.4 ＋ 行业插件（cosmetics v1.0、food v1.0））
 
-- 生成日期：2026-11-23
+- 生成日期：2026-11-24
 - 评测对象：`lcg` 规则引擎（src/lcg；规则源为核心包 rules.v1.json ＋ rules/plugins/*.json 行业插件；根 server.py 为兼容 shim）
-- 规则层用例：75 条（良性 31，对抗 44）
-- **整体通过率：100.0%**（75/75）
-- **高危样本检出率：100.0%**（40/40）
-- **干净样本误报率：0.0%**（0/27，越低越好）
+- 规则层用例：87 条（良性 37，对抗 50）
+- **整体通过率：100.0%**（87/87）
+- **高危样本检出率：100.0%**（46/46）
+- **干净样本误报率：0.0%**（0/32，越低越好）
 - LLM 层红队用例：4 条（注入/越狱，交由 DeepTeam·PyRIT 在 LLM 层裁决）
 - 语义层待跑用例：3 条（谐音/拆字/emoji/暗示，规则层已确认漏检，配 key 后由 LLM 层裁决）
 
@@ -42,6 +42,12 @@
 | b29 | benign | clean | clean | PASS | 0 | 控油/柔顺为合规普通护发功效，应放行 |
 | b30 | benign | clean | clean | PASS | 0 | 无种水品级词，仅圈口/证书/复检等客观信息，应放行 |
 | b31 | benign | clean | clean | PASS | 0 | 斜杠为并列分隔而非词内阻断，剥离后不得拼成违规词，应放行 |
+| b32 | benign | clean | clean | PASS | 0 | 合规活动价与库存描述，无虚构原价/紧迫感词，应放行 |
+| b33 | benign | clean | clean | PASS | 0 | 普通食品口感/包装描述，应放行 |
+| b34 | benign | clean | clean | PASS | 0 | 普通护手霜保湿滋润，合规肤感描述，应放行 |
+| b35 | benign | clean | clean | PASS | 0 | 合规售后与运费险承诺，非终身不坏保证，应放行 |
+| b36 | benign | low | low | PASS | 1 | 糯种术语 low 提示，带证书复检合规 |
+| b37 | benign | clean | clean | PASS | 0 | “首批/第一款/第二步”为次序与步骤，序数消歧后应放行 |
 | a01 | adversarial | high | high | PASS | 14 | 多重高危叠加 |
 | a02 | adversarial | high | high | PASS | 9 | 绝对化用语+虚构紧迫感 |
 | a03 | adversarial | high | high | PASS | 5 | 迷信伪科学+医疗功效 |
@@ -86,6 +92,12 @@
 | a42 | adversarial | high | high | PASS | 2 | 站外私下交易与支付宝直转，淘宝规则判 high |
 | a43 | adversarial | high | high | PASS | 1 | 斜杠分隔阻断“最好”，紧凑层剥离斜杠后规则层判 high |
 | a44 | adversarial | high | high | PASS | 1 | 斜杠分隔联系方式字母，紧凑层剥离后命中严格导流正则判 high |
+| a45 | adversarial | high | high | PASS | 3 | 多绝对化用语叠加（极品/万能/史无前例），判 high |
+| a46 | adversarial | high | high | PASS | 4 | 普通食品补肾壮阳/排毒/特效功效宣称，判 high |
+| a47 | adversarial | high | high | PASS | 3 | 永久承诺+零风险保证+包过承诺，虚假承诺判 high |
+| a48 | adversarial | high | high | PASS | 8 | 翡翠无依据货源/保真/收藏必涨诱导，判 high |
+| a49 | adversarial | high | high | PASS | 5 | 化妆品医用级/镇痛/特效医疗作用宣称，判 high |
+| a50 | adversarial | high | high | PASS | 2 | 加群/扫码站外导流，判 high |
 
 > 复现：`python evals/run_evals.py`。本报告由脚本生成，规则或用例变更后在 CI 自动刷新。
 > 仅为合规风险提示，不构成法律意见，以监管机关与平台最新规则为准。

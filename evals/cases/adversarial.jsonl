@@ -42,3 +42,9 @@
 {"id":"a42","industry":"general","platform":"taobao","expect_risk":"high","expect_any":["私下转账","支付宝直转"],"text":"拍下后私下转账给你，走支付宝直转更便宜。","note":"站外私下交易与支付宝直转，淘宝规则判 high"}
 {"id":"a43","industry":"general","platform":"douyin","expect_risk":"high","text":"这是最/好的一款，没有之一。","note":"斜杠分隔阻断“最好”，紧凑层剥离斜杠后规则层判 high"}
 {"id":"a44","industry":"general","platform":"douyin","expect_risk":"high","text":"想要优惠加 v/x：abc12345 私下聊。","note":"斜杠分隔联系方式字母，紧凑层剥离后命中严格导流正则判 high"}
+{"id":"a45","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["极品","万能","史无前例"],"text":"这款是极品配方，万能百搭，史无前例的用料。","note":"多绝对化用语叠加（极品/万能/史无前例），判 high"}
+{"id":"a46","industry":"food","platform":"douyin","expect_risk":"high","expect_any":["补肾","壮阳","排毒","特效"],"text":"坚持喝能补肾壮阳，排毒通便，特效调理身子。","note":"普通食品补肾壮阳/排毒/特效功效宣称，判 high"}
+{"id":"a47","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["永久","零风险","包过"],"text":"永久保修，零风险购买，包过满意再付款。","note":"永久承诺+零风险保证+包过承诺，虚假承诺判 high"}
+{"id":"a48","industry":"jadeite","platform":"douyin","expect_risk":"high","expect_any":["一手货源","矿口直供","保真","收藏必涨"],"text":"这块一手货源，矿口直供，绝对保真，收藏必涨。","note":"翡翠无依据货源/保真/收藏必涨诱导，判 high"}
+{"id":"a49","industry":"cosmetics","platform":"douyin","expect_risk":"high","expect_any":["医用","镇痛","特效"],"text":"医用级精华，镇痛舒缓，特效修复受损肌肤。","note":"化妆品医用级/镇痛/特效医疗作用宣称，判 high"}
+{"id":"a50","industry":"general","platform":"douyin","expect_risk":"high","expect_any":["加群","扫码"],"text":"加群领取优惠券，扫码进入粉丝团。","note":"加群/扫码站外导流，判 high"}

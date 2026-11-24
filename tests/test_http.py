@@ -105,6 +105,14 @@ def test_parse_key_tenants(monkeypatch):
     assert server_http._parse_key_tenants(None) == {"envk": "envtenant"}
 
 
+def test_parse_key_roles(monkeypatch):
+    monkeypatch.delenv("LCG_KEY_ROLES", raising=False)
+    parsed = server_http._parse_key_roles("k1=viewer, k2 = operator , bad,,=x")
+    assert parsed == {"k1": "viewer", "k2": "operator"}
+    monkeypatch.setenv("LCG_KEY_ROLES", "envk=admin")
+    assert server_http._parse_key_roles(None) == {"envk": "admin"}
+
+
 @pytest.mark.asyncio
 async def test_meter_records_mapped_tenant():
     import httpx

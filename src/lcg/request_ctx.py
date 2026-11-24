@@ -26,6 +26,7 @@ class RequestContext:
     meter: "UsageMeter"
     key_id: str = ""
     operator: str = ""
+    role: str = ""
 
 
 _CTX: ContextVar[Optional[RequestContext]] = ContextVar(

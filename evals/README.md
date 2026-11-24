@@ -6,6 +6,7 @@
 | `cases/benign.jsonl` | 干净/合规话术，测**误报** | 规则层 |
 | `cases/adversarial.jsonl` | 违规话术，测**检出** | 规则层 |
 | `cases/redteam.jsonl` | 注入/拆字/emoji/越狱 | **LLM 层**（DeepTeam/PyRIT，P1） |
+| `cases/semantic.jsonl` | 谐音/暗示，规则层设计内漏检 | **LLM 语义层** |
 
 ### 字段
 - `id`、`text`、`industry`、`platform`
@@ -22,7 +23,8 @@
 
 ## 运行
 ```bash
-python evals/run_evals.py        # 零依赖；跑分并刷新 reports/BENCHMARK.md
+python evals/run_evals.py              # 零依赖；规则门禁，刷新 reports/BENCHMARK.md
+python evals/run_variant_baseline.py   # 零依赖；纯规则层变体/红队基线，刷新 reports/VARIANT_BASELINE.md
 ```
 新增用例：直接往对应 jsonl 追加一行；规则改动后 CI 会自动重跑并把新 BENCHMARK 提交回仓库。
 

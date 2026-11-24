@@ -4,6 +4,26 @@
 
 规则库内容版本见 `rules/rules.v1.json` 的 `meta.version`（核心包当前 **v1.4**），与软件包版本相互独立；行业插件包在 `rules/plugins/*.json` 各自维护版本。
 
+## [0.8.0] - 2026-11-24
+
+平台化骨架由内存补齐到可持久化 + 可门禁，离线评测集与规则侧变体基线扩充；判定 API 与规则结论向后兼容，默认行为不变。
+
+### 新增
+- **身份 SQLite 持久化** `SQLiteIdentityStore`：`api_keys` 表存 key / tenant / role / user / active / 时间戳；`identity_store_from_env` 按 `LCG_IDENTITY_DSN` 选择内存或 SQLite，跨重开保留；补跨重开持久化与工厂选择测试。
+- **RBAC 角色动作门禁**：动作 `read/write/admin`，角色矩阵 viewer=read、operator=read+write、admin 全量；6 个 MCP 工具映射动作，`can/require_permission/action_for_tool`，越权抛 `PermissionError`；`RequestContext` 增 `role`；stdio 六工具首行经 `_guard` 守卫；HTTP 经 `LCG_KEY_ROLES` 按 Key 注入角色。
+- **规则评测集扩充**：良性 31→37、对抗 44→50（合规促销 / 售后 / 序数 / 肤感防误报，绝对化 / 医疗 / 虚假承诺 / 翡翠货源 / 化妆品医用 / 导流对抗召回）；规则评测 **87/87**。
+- **离线变体 / 红队基线脚手架** `evals/run_variant_baseline.py`：零依赖纯规则层跑 redteam / semantic 用例，分流 `rule_blocked` / `variant gap` / `by-design semantic gap`，产出 `reports/VARIANT_BASELINE.md`；补 4 条聚合分类测试。
+
+### 边界（仍未实现）
+- 账号注册 / 登录 / 密码哈希、Key 签发与轮换、对接外部身份服务；身份库可持久化但仍为单进程，不跨进程共享。
+- 规模化多模型红队（promptfoo / DeepTeam / PyRIT）待模型额度；医疗 / 金融 / 教培 / 酒水 / 跨境实词库待法务复核。
+
+### 回归
+- ruff 全仓通过、pytest **219 项**全绿、规则评测 **87/87**（良性 37、对抗 50；高危检出 100%、干净误报 0%）；变体基线 7 条（规则拦截 3、变体缺口 1、设计内语义缺口 3）；软件包版本升至 **0.8.0**（核心规则库 v1.4，行业插件 v1.0）。
+
+### 文档
+- README / README.en、CAPABILITY_TIERS、DEMO_SCRIPT、GIG_LISTING、REMOTE_LISTING、reports 索引同步 87/87 评测、219 单测与变体基线报告；`evals/README` 补 semantic 集与基线运行器说明。
+
 ## [0.7.8] - 2026-11-23
 
 平台化骨架补齐：身份/Key 内存映射、审计到人字段、审计/反馈检索过滤、可插拔缓存协议；配额预检增加 token 维度。判定 API 与规则结论向后兼容，默认行为不变。

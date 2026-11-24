@@ -71,6 +71,25 @@ def _parse_key_tenants(raw: "str | None" = None) -> dict[str, str]:
     return mapping
 
 
+def _parse_key_roles(raw: "str | None" = None) -> dict[str, str]:
+    """解析 ``LCG_KEY_ROLES``（逗号分隔 ``key=role``）为 Key→角色映射。
+
+    非法片段跳过；未配置时返回空映射，即请求上下文不带角色，工具守卫按未鉴权放行。
+    角色合法性由身份层在权限校验时统一校验。
+    """
+    mapping: dict[str, str] = {}
+    value = os.environ.get("LCG_KEY_ROLES", "") if raw is None else raw
+    for part in str(value or "").split(","):
+        part = part.strip()
+        if not part or "=" not in part:
+            continue
+        key, _, role = part.partition("=")
+        key, role = key.strip(), role.strip()
+        if key and role:
+            mapping[key] = role
+    return mapping
+
+
 class BearerAuthASGI:
     """纯 ASGI 鉴权中间件（不缓冲响应体，兼容 MCP 的 SSE/流式响应）。
 
@@ -81,11 +100,13 @@ class BearerAuthASGI:
 
     def __init__(self, app: Any, tokens: "set[str] | None" = None,
                  meter: "UsageMeter | None" = None,
-                 key_tenants: "dict[str, str] | None" = None) -> None:
+                 key_tenants: "dict[str, str] | None" = None,
+                 key_roles: "dict[str, str] | None" = None) -> None:
         self.app = app
         self.tokens = tokens or set()
         self.meter = meter
         self.key_tenants = key_tenants or {}
+        self.key_roles = key_roles or {}
 
     def _authorize(self, key: str) -> "tuple[str | None, JSONResponse | None]":
         """鉴权通过后做配额预检：返回 (tenant_id, None) 放行，(None, response) 拦截。"""
@@ -130,7 +151,8 @@ class BearerAuthASGI:
             # 未映射租户时 tenant_id 留空，计量回填自动跳过。
             ctx_token = request_ctx.set_request(
                 request_ctx.RequestContext(
-                    tenant_id=tenant or "", meter=self.meter, key_id=key))
+                    tenant_id=tenant or "", meter=self.meter, key_id=key,
+                    role=self.key_roles.get(key, "")))
             try:
                 return await self.app(scope, receive, send)
             finally:
@@ -155,11 +177,14 @@ async def healthz(request) -> JSONResponse:  # noqa: ARG001
 
 def build_app(token: "str | list[str] | None" = None,
               key_tenants: "str | dict[str, str] | None" = None,
-              meter: "UsageMeter | None" = None):
+              meter: "UsageMeter | None" = None,
+              key_roles: "str | dict[str, str] | None" = None):
     """构造 Starlette app（测试可直接用 ASGI in-process 或 uvicorn 承载）。
 
     - ``key_tenants``：``key=tenant`` 映射；传字符串走 ``LCG_KEY_TENANTS`` 同款解析，
       传 dict 直接使用；未配置则 Key 不归属特定租户、不计配额。
+    - ``key_roles``：``key=role`` 映射；传字符串走 ``LCG_KEY_ROLES`` 同款解析，
+      传 dict 直接使用；未配置则请求上下文不带角色，工具守卫按未鉴权放行。
     - ``meter``：可注入计量器（测试用）；默认按 ``LCG_STORE_DSN`` 建配额存储。
     """
     tokens = _parse_tokens(token)
@@ -172,9 +197,11 @@ def build_app(token: "str | list[str] | None" = None,
             mapping = dict(key_tenants)
         else:
             mapping = _parse_key_tenants(key_tenants)
+        role_mapping = (dict(key_roles) if isinstance(key_roles, dict)
+                        else _parse_key_roles(key_roles))
         store_meter = meter or UsageMeter(quota_store_from_env())
         app.add_middleware(BearerAuthASGI, tokens=tokens, meter=store_meter,
-                           key_tenants=mapping)
+                           key_tenants=mapping, key_roles=role_mapping)
     return app
 
 

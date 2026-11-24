@@ -23,9 +23,17 @@ from typing import Any, Dict, List, Literal, Optional
 
 from mcp.server.fastmcp import FastMCP
 
-from . import engine, pipeline
+from . import engine, pipeline, request_ctx
+from .identity import action_for_tool, require_permission
 
 SERVER_NAME = "livestream-compliance-guard"
+
+
+def _guard(tool_name: str) -> None:
+    """按当前请求上下文的角色校验工具动作；无上下文（stdio / 未启用鉴权）时放行。"""
+    ctx = request_ctx.current()
+    role = ctx.role if ctx else ""
+    require_permission(role, action_for_tool(tool_name))
 
 
 def create_mcp() -> FastMCP:
@@ -39,6 +47,7 @@ def create_mcp() -> FastMCP:
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
         """扫描单条直播/短视频文本，返回风险等级、命中明细与处置建议。"""
+        _guard("scan_text")
         return engine.detect(text, industry=industry, platform=platform)
 
     @mcp.tool()
@@ -48,6 +57,7 @@ def create_mcp() -> FastMCP:
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
         """扫描整场直播逐句文本。transcript 为 [{seq, speaker, text}, ...]。"""
+        _guard("scan_livestream")
         return engine.scan_batch(transcript, industry=industry, platform=platform)
 
     @mcp.tool()
@@ -56,6 +66,7 @@ def create_mcp() -> FastMCP:
         platform: Optional[Literal["douyin", "kuaishou", "shipinhao", "taobao"]] = None,
     ) -> Dict[str, Any]:
         """返回当前生效的合规规则与规则库版本，供客户端展示/同步。"""
+        _guard("compliance_rules")
         return engine.get_rules(industry=industry, platform=platform)
 
     @mcp.tool()
@@ -65,6 +76,7 @@ def create_mcp() -> FastMCP:
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
         """对命中词给出替换建议、改写全文并复检风险；正式话术请人工复核。"""
+        _guard("safe_rewrite")
         return engine.suggest_rewrite(text, industry=industry, platform=platform)
 
     @mcp.tool()
@@ -79,6 +91,7 @@ def create_mcp() -> FastMCP:
         规则永远先跑且不可被 LLM 降低；未配置模型 key、超时或返回异常时自动回退纯规则
         （mode=rules_only），正常融合时 mode=rules_plus_llm。
         """
+        _guard("scan_smart")
         return pipeline.analyze(text, industry=industry, platform=platform, use_llm=use_llm)
 
     @mcp.tool()
@@ -89,6 +102,7 @@ def create_mcp() -> FastMCP:
         use_llm: bool = True,
     ) -> Dict[str, Any]:
         """优先用 LLM 生成保留卖点的自然合规话术并规则复检；不可用或复检不通过则回退规则替换。"""
+        _guard("rewrite_smart")
         return pipeline.smart_rewrite(text, industry=industry, platform=platform, use_llm=use_llm)
 
     return mcp
