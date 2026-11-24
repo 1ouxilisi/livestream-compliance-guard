@@ -39,7 +39,7 @@ from .rules_store import (
     replacements,
 )
 
-__version__ = "0.7.8"
+__version__ = "0.8.0"
 
 __all__ = [
     "__version__",

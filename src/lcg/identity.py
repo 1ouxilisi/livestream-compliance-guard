@@ -5,10 +5,12 @@ Boundary:
   * Key -> tenant / role / operator mapping; default in-memory, with an
     optional local SQLite backend (``LCG_IDENTITY_DSN``) that persists on disk.
     No password hash, no login/register UI, no cross-process sharing.
+  * Role carries a local read/write/admin action gate via require_permission;
+    this thin RBAC skeleton is single-process and does not replace external
+    identity-service authentication, password hashing, login/register UI, or
+    Key issuance/rotation.
   * Production identity must implement ``IdentityStore`` against an external
     identity service; see docs/DEPLOYMENT.md.
-  * Role is a label carried to audit trails; role-based endpoint gating is not
-    implemented in this round.
 """
 from __future__ import annotations
 

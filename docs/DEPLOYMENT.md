@@ -15,7 +15,7 @@
 ## 2. 当前架构边界（现状，勿过度承诺）
 
 - **单进程**：LLM 语义缓存、调用预算为进程内单例（`pipeline._GLOBAL_JUDGE`），重启即清空；多实例间不共享。
-- **账号体系为内存骨架**：HTTP 层支持多个共享访问 Key（`LCG_BEARER_TOKEN` 单值兼容 / `LCG_BEARER_TOKENS` 逗号分隔）；`lcg.identity` 提供 `ApiKey` → 租户 / 角色 / 操作人的内存映射与停用/最近使用记录，角色 `admin` / `operator` / `viewer` 仅作标签透传。仍没有用户注册 / 登录 / 密码哈希、按角色的接口权限拦截、Key 签发轮换；`lcg.tenant` 提供进程内存实现与可选本机 SQLite 后端，不做跨进程隔离。
+- **账号体系为单进程骨架**：HTTP 层支持多个共享访问 Key（`LCG_BEARER_TOKEN` 单值兼容 / `LCG_BEARER_TOKENS` 逗号分隔）；`lcg.identity` 提供 `ApiKey` → 租户 / 角色 / 操作人映射与停用/最近使用记录，默认进程内存，可选本机 SQLite 持久化后端（`LCG_IDENTITY_DSN`，落盘重启不丢）。角色 `admin` / `operator` / `viewer` 映射到 `read/write/admin` 动作，6 个工具入口按动作做薄门禁，越权抛 `PermissionError`；Key→角色可经 `LCG_KEY_ROLES` 注入。仍没有用户注册 / 登录 / 密码哈希、Key 签发轮换、对接外部身份服务；身份库为单进程持久化，不跨进程共享。`lcg.tenant` 提供进程内存实现与可选本机 SQLite 后端，不做跨进程隔离。
 - **留痕为本地文件**：审计（`lcg.audit`）与反馈（`lcg.feedback`）默认关闭，启用后写本地 JSONL；配额 / 用量可选落本机 SQLite；无外置数据库、无远程汇聚。
 - **文本输入**：`lcg.ingest` / `lcg.sources` 归一上游 ASR / OCR / 字幕 / 表格产出的文本片段；本服务不做 ASR 语音识别、不做 OCR 图像识别。`lcg.sources` 定义了输入源协议与 `Recognizer` 识别适配器协议及内存桩，均不发起真实网络调用；真实识别后端由部署方接入。
 - **规则与代码同仓**：词库为仓库内 JSON，更新需随版本发布或重新部署；暂无在线热更新控制台。
