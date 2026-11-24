@@ -25,11 +25,13 @@
 ```bash
 python evals/run_evals.py              # 零依赖；规则门禁，刷新 reports/BENCHMARK.md
 python evals/run_variant_baseline.py   # 零依赖；纯规则层变体/红队基线，刷新 reports/VARIANT_BASELINE.md
+python scripts/run_llm_evals.py        # 配 key 在线；单模型主备快照，刷新 reports/LLM_EVAL.md
+python scripts/run_model_crosscheck.py # 配 key 在线；双模型交叉对比，刷新 reports/MODEL_CROSSCHECK.md
 ```
 新增用例：直接往对应 jsonl 追加一行；规则改动后 CI 会自动重跑并把新 BENCHMARK 提交回仓库。
 
 ## 接入 LLM 层红队（P1）
-- `promptfooconfig.yaml`：`npm i -g promptfoo` 后 `promptfoo eval -c evals/promptfooconfig.yaml`，对 LLM 改写/变体识别做红队与回归（CI 原生）。
+- `promptfooconfig.yaml`：providers 已指向硅基流动主力/兜底双模型（key 走 `SILICONFLOW_API_KEY` 环境变量）；`npm i -g promptfoo` 后 `promptfoo eval -c evals/promptfooconfig.yaml`，对 LLM 改写/变体识别做广度红队与回归。双模型基础交叉已由 `scripts/run_model_crosscheck.py` 覆盖，无需 npm。
 - `deepteam.config.example.json`：DeepTeam（`pip install deepeval`）配置骨架，OWASP LLM Top10 映射，产出 `reports/SECURITY.md`。
 - 深度多轮可再加微软 **PyRIT**、模型级广度扫描用 **Garak**。
 - redteam.jsonl 里的拆字/emoji 用例预期会绕过纯规则层——这正是 LLM 语义层 + 输入归一化存在的理由，也是你对外讲"规则是硬底线、LLM 补变体"的证据。

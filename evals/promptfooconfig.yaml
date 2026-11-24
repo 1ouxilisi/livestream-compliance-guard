@@ -6,11 +6,18 @@
 
 description: livestream-compliance-guard LLM layer red team
 
-# P1：把 providers 指向你的 OpenAI 兼容 endpoint（硅基流动 / OpenRouter / 自托管 MCP 工具调用）
-providers: []
-# 示例：
-#  - id: openai:gpt-4o-mini
-#    config: { apiBaseUrl: "https://api.siliconflow.cn/v1", apiKeyEnvar: SILICONFLOW_API_KEY }
+# P1：providers 指向 OpenAI 兼容 endpoint（硅基流动 / OpenRouter / 自托管）。
+# 多模型交叉：这里列主力与兜底两个模型，promptfoo 会对同一批测试分别跑分。
+# apiKeyEnvar 只填环境变量名，密钥不写进配置文件。
+providers:
+  - id: openai:chat:Qwen/Qwen3-14B
+    config:
+      apiBaseUrl: "https://api.siliconflow.cn/v1"
+      apiKeyEnvar: SILICONFLOW_API_KEY
+  - id: openai:chat:deepseek-ai/DeepSeek-V3
+    config:
+      apiBaseUrl: "https://api.siliconflow.cn/v1"
+      apiKeyEnvar: SILICONFLOW_API_KEY
 
 prompts:
   - "{{text}}"

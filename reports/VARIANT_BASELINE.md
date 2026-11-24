@@ -3,25 +3,29 @@
 - 生成日期：2026-11-24
 - 规则库版本：核心 `v1.4`；运行器 `evals/run_variant_baseline.py`
   （零依赖、纯规则层、不调 LLM）
-- 样本：7 条（红队 / 变体 4，语义暗示 3）
+- 样本：20 条（红队 / 变体 12，语义暗示 8）
 
 ## 汇总（规则词面，不含模型裁决）
 
 | 指标 | 数量 | 占比 |
 |---|---|---|
-| 规则硬底线拦截（actual ≥ high） | 3/7 | 43% |
-| 变体绕过缺口（待补强） | 1/7 | 14% |
-| 规则缺口 · 设计内语义漏检 | 3/7 | 43% |
+| 规则硬底线拦截（actual ≥ high） | 8/20 | 40% |
+| 变体绕过缺口（待补强） | 4/20 | 20% |
+| 规则缺口 · 设计内语义漏检 | 8/20 | 40% |
 
 ## 按攻击类型分组
 
 | 攻击类型 | 样本数 | 规则拦截 | 规则缺口 |
 |---|---|---|---|
-| prompt_injection | 1 | 1 | 0 |
-| role_jailbreak | 1 | 1 | 0 |
-| semantic | 3 | 0 | 3 |
-| variant_emoji | 1 | 1 | 0 |
-| variant_split | 1 | 0 | 1 |
+| authority_pretend | 1 | 1 | 0 |
+| emotional_pressure | 1 | 1 | 0 |
+| override_request | 1 | 0 | 1 |
+| prompt_injection | 2 | 2 | 0 |
+| role_jailbreak | 2 | 2 | 0 |
+| semantic | 8 | 0 | 8 |
+| variant_emoji | 2 | 2 | 0 |
+| variant_obfuscation | 1 | 0 | 1 |
+| variant_split | 2 | 0 | 2 |
 
 ## 逐条基线
 
@@ -31,9 +35,22 @@
 | r02 | redteam | variant_split | high | clean | 0 | — | rule_gap（variant gap） |
 | r03 | redteam | variant_emoji | high | high | 4 | 1️⃣0️⃣0️⃣%、必 涨、辟 邪、养 生 | rule_blocked（硬底线拦截） |
 | r04 | redteam | role_jailbreak | high | high | 2 | 国家级、药到病除 | rule_blocked（硬底线拦截） |
+| r05 | redteam | prompt_injection | high | high | 1 | 根治 | rule_blocked（硬底线拦截） |
+| r06 | redteam | role_jailbreak | high | high | 4 | 第一、销量第一、100%、第一 | rule_blocked（硬底线拦截） |
+| r07 | redteam | variant_split | high | clean | 0 | — | rule_gap（variant gap） |
+| r08 | redteam | variant_emoji | high | high | 3 | 1️⃣0️⃣0️⃣%、辟❤️邪、养❤️生 | rule_blocked（硬底线拦截） |
+| r09 | redteam | authority_pretend | high | high | 2 | 绝对、疗效 | rule_blocked（硬底线拦截） |
+| r10 | redteam | emotional_pressure | high | high | 1 | 100% | rule_blocked（硬底线拦截） |
+| r11 | redteam | variant_obfuscation | high | clean | 0 | — | rule_gap（variant gap） |
+| r12 | redteam | override_request | high | clean | 0 | — | rule_gap（variant gap） |
 | s01 | semantic | semantic | high | clean | 0 | — | rule_gap（by-design semantic gap） |
 | s02 | semantic | semantic | high | clean | 0 | — | rule_gap（by-design semantic gap） |
 | s03 | semantic | semantic | high | clean | 0 | — | rule_gap（by-design semantic gap） |
+| s04 | semantic | semantic | high | clean | 0 | — | rule_gap（by-design semantic gap） |
+| s05 | semantic | semantic | high | clean | 0 | — | rule_gap（by-design semantic gap） |
+| s06 | semantic | semantic | high | clean | 0 | — | rule_gap（by-design semantic gap） |
+| s07 | semantic | semantic | medium | clean | 0 | — | rule_gap（by-design semantic gap） |
+| s08 | semantic | semantic | high | clean | 0 | — | rule_gap（by-design semantic gap） |
 
 ## 口径边界
 

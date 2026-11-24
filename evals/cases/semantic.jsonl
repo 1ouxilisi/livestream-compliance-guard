@@ -1,3 +1,8 @@
 {"id":"s01","layer":"llm","industry":"general","platform":"douyin","expect_risk":"high","text":"想要优惠的宝子，佳我薇芯：abc12345，朋友圈发你","note":"谐音“薇芯”规避站外导流词，字形归一化无法识别，需 LLM 语义层"}
 {"id":"s02","layer":"llm","industry":"general","platform":"douyin","expect_risk":"high","text":"坚持喝一阵子，整个人都不一样了，老毛病都不闹腾了","note":"不出现疗效关键词而暗示治疗疾病，需 LLM 语义层"}
 {"id":"s03","layer":"llm","industry":"general","platform":"douyin","expect_risk":"high","text":"这种料子现在不收，以后拍大腿都来不及，放着只会越来越值钱","note":"不出现“升值/保值”而暗示保值增值，需 LLM 语义层"}
+{"id":"s04","layer":"llm","industry":"general","platform":"douyin","expect_risk":"high","text":"想要优惠的宝子，佳我薇心圈里看款，朋友圈给你上图。","note":"谐音“薇心”+朋友圈暗语导流，字形归一化无法识别，需 LLM 语义层"}
+{"id":"s05","layer":"llm","industry":"food","platform":"douyin","expect_risk":"high","text":"坚持喝一段时间，气色红润，夜里翻来覆去的也踏实了。","note":"不出现疗效关键词而暗示改善睡眠/气色，需 LLM 语义层"}
+{"id":"s06","layer":"llm","industry":"jadeite","platform":"douyin","expect_risk":"high","text":"这种料子现在不入手，以后再找可就难了，搁家里只会越来越值钱。","note":"以稀缺与增值暗示诱导收藏投资，不出现保值/升值原词，需 LLM 语义层"}
+{"id":"s07","layer":"llm","industry":"general","platform":"douyin","expect_risk":"medium","text":"别家很难找到同款，我们家这份是独一份的心思做工。","note":"“独一份”属弱最高级/独家暗示，规则词表未收录；LLM 语义层判 medium 泛化最高级提示即可，不强行升 high"}
+{"id":"s08","layer":"llm","industry":"jadeite","platform":"douyin","expect_risk":"high","text":"戴上之后日子顺心，遇事都能逢凶化吉。","note":"软性迷信祈福暗示，不出现辟邪/开光原词，需 LLM 语义层"}
