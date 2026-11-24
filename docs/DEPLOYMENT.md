@@ -34,6 +34,8 @@
 | `LCG_BEARER_TOKEN` | HTTP 共享访问令牌（单值，向后兼容）；不设置则本地开放（仅限可信内网） | 空 |
 | `LCG_BEARER_TOKENS` | HTTP 多 Key，逗号分隔；与 `LCG_BEARER_TOKEN` 合并生效 | 空 |
 | `LCG_KEY_TENANTS` | Key→租户映射，逗号分隔 `key=tenant_id`；鉴权通过后按映射记请求级调用次数；未映射 Key 不计费 | 空（不映射） |
+| `LCG_KEY_ROLES` | Key→角色映射，逗号分隔 `key=role`（`viewer`/`operator`/`admin`）；鉴权通过后按角色做工具动作门禁；未配置则上下文不带角色，按未鉴权放行 | 空（不带角色） |
+| `LCG_IDENTITY_DSN` | 身份 Key 映射存储：空 = 进程内存；文件路径 = 本机 SQLite 落盘；`:memory:` = SQLite 内存库 | 空（内存） |
 | `LCG_STORE_DSN` | 配额 / 用量存储：空 = 进程内存；文件路径 = 本机 SQLite 落盘；`:memory:` = SQLite 内存库 | 空（内存） |
 | `LCG_HTTP_HOST` / `LCG_HTTP_PORT` | HTTP 监听地址 / 端口 | `0.0.0.0` / `8000` |
 | `LCG_AUDIT_LOG` | 审计留痕路径：`.jsonl`/`.json`/普通路径 = JSONL 文本；`.db`/`.sqlite`/`.sqlite3` 或 `:memory:` = SQLite；不设置则不落盘 | 空（关闭） |
@@ -58,7 +60,7 @@
 | 方向 | 现状基础 | 待补能力 |
 |---|---|---|
 | 多租户隔离 | `lcg.tenant` Tenant/配额骨架；内存或可选本机 SQLite；多共享 Key 与 Key→租户映射（请求级 calls 计数） | 租户身份、独立词库 / 插件包、数据与配置隔离、按租户配额 |
-| 账号与鉴权 | HTTP 多共享 Key 静态校验（Bearer 集合）；`LCG_KEY_TENANTS` 把 Key 映射到租户；`lcg.identity` `ApiKey` → 租户/角色/操作人内存映射、停用与最近使用记录 | 用户/租户账号体系、注册登录与密码哈希、API Key 签发与轮换、按角色权限拦截、对接外部身份服务 |
+| 账号与鉴权 | HTTP 多共享 Key 静态校验（Bearer 集合）；`LCG_KEY_TENANTS` 把 Key 映射到租户、`LCG_KEY_ROLES` 映射到角色；`lcg.identity` `ApiKey` → 租户/角色/操作人映射，内存或可选本机 SQLite（`LCG_IDENTITY_DSN`）；read/write/admin 动作矩阵 + 六工具薄门禁，越权抛 `PermissionError` | 用户/租户账号体系、注册登录与密码哈希、API Key 签发与轮换、对接外部身份服务；当前薄门禁为单进程骨架，不替代外部鉴权与审计 |
 | 配额与计费 | `lcg.tenant` 配额扣减与用量快照；内存 + 可选本机 SQLite；HTTP 按映射 Key 记请求级 calls，停用/未注册返回 403、次数超额返回 429；pipeline 结束把 LLM token 回填到归属租户 | 超额 token 的强制拦截、外置持久化计量、对接账单与套餐；单价配置化 |
 | 存储 | 审计 / 反馈可选 JSONL 或本机 SQLite（按路径扩展名分流）；配额 / 用量可选本机 SQLite；`audit.query` / `feedback.query` 支持按行业 / 平台 / 类型 / 风险 / 操作人 / Key 过滤 | 外置数据库或对象存储、留存策略、跨进程共享、备份与归档 |
 | 无状态与扩展 | 进程内缓存 / 预算；`lcg.cache` `CacheStore` 协议与 `InMemoryCache`（可选 TTL，惰性过期） | 缓存与预算外置（Redis 等），实现 `CacheStore` 协议替换；支持多实例水平扩展 |
