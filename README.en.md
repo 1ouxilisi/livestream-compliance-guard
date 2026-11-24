@@ -2,7 +2,7 @@
 
 > Real-time banned-word / absolute-term / false-claim detection for **live-commerce** hosts, AI shopping agents and digital-human sellers — built on China Advertising Law plus major platform rules. A shared, language-neutral rule core ships built-in **jadeite** rules and pluggable **food/health-food** and **cosmetics** lexicons.
 
-[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.9.0-orange)]()
+[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.9.1-orange)]()
 
 Repository: `github.com/1ouxilisi/livestream-compliance-guard`
 
@@ -79,9 +79,9 @@ The rule source of truth is the core bundle `rules/rules.v1.json` plus plugin bu
 - Platforms: Douyin, Kuaishou, WeChat Channels shop, Taobao Live (off-platform diversion, private deals, order brushing, fake-review rebates, A-shipped-as-B).
 - Industries: `jadeite` (built-in, scope-isolated), `food`, `cosmetics` (external plugins), `general` otherwise. Compliant phrasing is deliberately allowed (e.g. registered health-food functions with "this product cannot replace medicine", ordinary cosmetic effects, registered special claims).
 - Two-layer normalization: equal-length layer (full-width to half-width, lowercase, common traditional→simplified) and compact layer (strip spaces / middle dots / emoji / slash / pipe / backslash blockers); ordinal disambiguation for "first"; diversion regex requires a signal word plus digits; replacements are rechecked after rewriting (closed loop).
-- Rule layer: **95 offline cases, 100% pass** (100% high-risk recall, 0% clean false positives; 40 benign, 55 adversarial, incl. English absolute/authenticity/appreciation/medical/diversion cases). Performance: ~1.93 ms/sentence average, P95 ~2.72 ms, ~518 sentences/s on this machine (relative comparison only).
+- Rule layer: **95 offline cases, 100% pass** (100% high-risk recall, 0% clean false positives; 40 benign, 55 adversarial, incl. English absolute/authenticity/appreciation/medical/diversion cases). Performance: rule-layer detection runs in milliseconds per sentence on this machine; latency and throughput vary with machine load (relative comparison only, not a production SLA; see the latest PERF.md snapshot).
 - LLM layer: OpenAI-compatible (primary Qwen/Qwen3-14B, fallback DeepSeek-V3); online snapshot **73/73** (recall 14/14, red-team 22/22, zero false-positive 37/37); two-model crosscheck on 34 cases Qwen3-14B 34/34, DeepSeek-V3 33/34 (1 divergence r12); output fluctuates with model version. Online results depend on account balance and model version — see the latest snapshot in `reports/LLM_EVAL.md`; degrades to rules-only with no key. Token usage (input/output/total) is collected and passed through; cost can be estimated from configured per-MTok prices.
-- **219 unit tests** passing. See [`reports/PERF.md`](reports/PERF.md), [`reports/LLM_EVAL.md`](reports/LLM_EVAL.md), [`reports/MODEL_CROSSCHECK.md`](reports/MODEL_CROSSCHECK.md), [`reports/VARIANT_BASELINE.md`](reports/VARIANT_BASELINE.md), [`reports/SECURITY.md`](reports/SECURITY.md).
+- **230 unit tests** passing. See [`reports/PERF.md`](reports/PERF.md), [`reports/LLM_EVAL.md`](reports/LLM_EVAL.md), [`reports/MODEL_CROSSCHECK.md`](reports/MODEL_CROSSCHECK.md), [`reports/VARIANT_BASELINE.md`](reports/VARIANT_BASELINE.md), [`reports/SECURITY.md`](reports/SECURITY.md).
 
 ## Boundaries
 
