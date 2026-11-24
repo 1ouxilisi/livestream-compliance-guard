@@ -62,7 +62,7 @@
 // ->（成功融合）
 { "risk_level": "high", "clean": false, "count": 3, "hits": [ Hit(rule…), Hit(llm…) ],
   "industry": "general", "platform": "douyin", "mode": "rules_plus_llm",
-  "llm": { "status": "ok", "model": "…", "prompt_version": "detect-v3",
+  "llm": { "status": "ok", "model": "…", "prompt_version": "detect-v4",
            "rewrite_prompt_version": "rewrite-v1", "cached": false, "calls": 1, "error": "",
            "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0 },
   "disclaimer": "…" }

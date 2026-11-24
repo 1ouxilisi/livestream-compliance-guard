@@ -80,7 +80,7 @@ The rule source of truth is the core bundle `rules/rules.v1.json` plus plugin bu
 - Industries: `jadeite` (built-in, scope-isolated), `food`, `cosmetics` (external plugins), `general` otherwise. Compliant phrasing is deliberately allowed (e.g. registered health-food functions with "this product cannot replace medicine", ordinary cosmetic effects, registered special claims).
 - Two-layer normalization: equal-length layer (full-width to half-width, lowercase, common traditional→simplified) and compact layer (strip spaces / middle dots / emoji / slash / pipe / backslash blockers); ordinal disambiguation for "first"; diversion regex requires a signal word plus digits; replacements are rechecked after rewriting (closed loop).
 - Rule layer: **87 offline cases, 100% pass** (100% high-risk recall, 0% clean false positives; 37 benign, 50 adversarial). Performance: ~1.93 ms/sentence average, P95 ~2.72 ms, ~518 sentences/s on this machine (relative comparison only).
-- LLM layer: OpenAI-compatible (primary Qwen/Qwen3-14B, fallback DeepSeek-V3); online snapshot **59/59** (recall 8/8, red-team 14/14, zero false-positive 37/37); two-model crosscheck Qwen3-14B 20/20, DeepSeek-V3 18/20; output fluctuates with model version. Online results depend on account balance and model version — see the latest snapshot in `reports/LLM_EVAL.md`; degrades to rules-only with no key. Token usage (input/output/total) is collected and passed through; cost can be estimated from configured per-MTok prices.
+- LLM layer: OpenAI-compatible (primary Qwen/Qwen3-14B, fallback DeepSeek-V3); online snapshot **73/73** (recall 14/14, red-team 22/22, zero false-positive 37/37); two-model crosscheck on 34 cases Qwen3-14B 34/34, DeepSeek-V3 33/34 (1 divergence r12); output fluctuates with model version. Online results depend on account balance and model version — see the latest snapshot in `reports/LLM_EVAL.md`; degrades to rules-only with no key. Token usage (input/output/total) is collected and passed through; cost can be estimated from configured per-MTok prices.
 - **219 unit tests** passing. See [`reports/PERF.md`](reports/PERF.md), [`reports/LLM_EVAL.md`](reports/LLM_EVAL.md), [`reports/MODEL_CROSSCHECK.md`](reports/MODEL_CROSSCHECK.md), [`reports/VARIANT_BASELINE.md`](reports/VARIANT_BASELINE.md), [`reports/SECURITY.md`](reports/SECURITY.md).
 
 ## Boundaries
@@ -98,7 +98,7 @@ Docs: [Compliance mapping](docs/COMPLIANCE_MAPPING.md) · [Scope & boundaries](d
 
 ## Roadmap
 
-- [x] Real LLM integration (Chinese): homophone/innuendo recall + injection/jailbreak resistance + full-sentence rewrite (v0.6.0, snapshot 59/59); two-model crosscheck in `reports/MODEL_CROSSCHECK.md`. English/cross-lingual and broad promptfoo/DeepTeam red-team still P1.
+- [x] Real LLM integration: homophone/innuendo recall + injection/jailbreak/authority/override resistance + full-sentence rewrite (v0.6.0, snapshot 73/73); two-model crosscheck in `reports/MODEL_CROSSCHECK.md`. Rule lexicon is zh-CN-first; broad English/cross-lingual lexicon and promptfoo/DeepTeam automated red-team still P1.
 - [ ] Real-time ASR ingestion: speech-to-text → per-sentence live alerting.
 - [x] More industries (plugin): food/health-food, cosmetics (v0.5.0).
 - [ ] More industries: medical device, education, finance, alcohol (regulations verified item by item first).

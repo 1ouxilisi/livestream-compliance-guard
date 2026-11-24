@@ -41,7 +41,7 @@
 | S3 | 批量明细 CSV | 表格软件打开 `samples/batch_report.csv` | 序号 / 主播 / 话术 / 风险级别 / 命中类别 | 附图：逐条判定明细 |
 | S4 | 改写前后对照 | 表格软件打开 `samples/rewrite_before_after.csv` | 原文 → 替换映射 → 改写后全文 → 复检 clean | 附图：改写闭环 |
 | S5 | 反馈导出样例 | 表格软件打开 `samples/feedback_example.csv` | 误报 / 漏报 / 存疑三类反馈记录 | 附图：反馈闭环（B 档能力，如实标注本地留痕） |
-| S6 | 信任凭证 | `reports/BENCHMARK.md`、`reports/LLM_EVAL.md`、`reports/MODEL_CROSSCHECK.md`、`reports/PERF.md` 关键段截图 | 87/87、59/59、双模型交叉、性能基准 | 附图：可复现评测背书 |
+| S6 | 信任凭证 | `reports/BENCHMARK.md`、`reports/LLM_EVAL.md`、`reports/MODEL_CROSSCHECK.md`、`reports/PERF.md` 关键段截图 | 87/87、73/73、双模型交叉、性能基准 | 附图：可复现评测背书 |
 
 ### 2.2 录屏（演示视频，3.5–5 分钟；可剪 60s 短片）
 
