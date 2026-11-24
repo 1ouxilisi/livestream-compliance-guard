@@ -21,16 +21,49 @@ lcg.server_http —— 远程 MCP（Streamable HTTP）入口，含健康检查�
 from __future__ import annotations
 
 import os
+import time
 from typing import Any
 
-from starlette.responses import JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse
 from starlette.routing import Route
 
-from . import __version__, request_ctx, rules_store
+from . import __version__, pipeline, request_ctx, rules_store
+from .demo_page import DEMO_HTML
 from .server_stdio import create_mcp
 from .tenant import UsageMeter, quota_store_from_env
 
-_PUBLIC_PATHS = {"/healthz"}
+_DEMO_PATH = "/demo"
+_DEMO_API_PATH = "/demo/analyze"
+
+# 公开路径：探活与演示页免鉴权；其余（含 /mcp）在配置了 Key 后必须带 Bearer。
+_PUBLIC_PATHS = {"/healthz", _DEMO_PATH, _DEMO_API_PATH, _DEMO_API_PATH + "/"}
+
+_DEMO_MAX_CHARS = 2000
+_DEMO_RATE_LIMIT = 20
+_DEMO_RATE_WINDOW = 60.0
+_demo_windows: dict[str, list[float]] = {}
+
+
+def _rate_ok(client: str) -> bool:
+    """进程内滑动窗口限流（公开 demo 用，防止被脚本刷）。
+
+    单进程内存实现，不做跨副本共享：多副本部署时每副本各有配额，
+    对演示用途足够；生产配额仍由 tenant 计量层负责。
+    """
+    now = time.monotonic()
+    window = _demo_windows.setdefault(client, [])
+    window[:] = [t for t in window if now - t < _DEMO_RATE_WINDOW]
+    if len(window) >= _DEMO_RATE_LIMIT:
+        return False
+    window.append(now)
+    if len(_demo_windows) > 4096:  # 防止 IP 维度无限增长
+        for key in [k for k, v in _demo_windows.items() if not v]:
+            _demo_windows.pop(key, None)
+    return True
+
+
+async def demo_page(request) -> HTMLResponse:  # noqa: ARG001
+    return HTMLResponse(DEMO_HTML)
 
 
 def _parse_tokens(explicit: "str | list[str] | None") -> set[str]:
@@ -175,6 +208,74 @@ async def healthz(request) -> JSONResponse:  # noqa: ARG001
     })
 
 
+async def demo_analyze(request) -> JSONResponse:
+    """公开演示端点：固定 rules-only，永不调用模型，绝不消耗 token 预算。
+
+    输入上限与限流都在服务端强制，前端 maxlength 只是提示。
+    """
+    client = getattr(getattr(request, "client", None), "host", "") or "anonymous"
+    if not _rate_ok(client):
+        return JSONResponse(
+            {"error": "rate_limited",
+             "detail": f"public demo allows {_DEMO_RATE_LIMIT} checks per minute"},
+            status_code=429,
+            headers={"Retry-After": str(int(_DEMO_RATE_WINDOW))})
+    try:
+        payload = await request.json()
+    except Exception:
+        return JSONResponse(
+            {"error": "bad_request", "detail": "request body must be JSON"},
+            status_code=400)
+    if not isinstance(payload, dict):
+        return JSONResponse(
+            {"error": "bad_request", "detail": "request body must be a JSON object"},
+            status_code=400)
+
+    text = payload.get("text", "")
+    if not isinstance(text, str):
+        return JSONResponse(
+            {"error": "bad_request", "detail": "text must be a string"},
+            status_code=400)
+    text = text.strip()
+    if not text:
+        return JSONResponse(
+            {"error": "bad_request", "detail": "text is required"},
+            status_code=400)
+    if len(text) > _DEMO_MAX_CHARS:
+        return JSONResponse(
+            {"error": "bad_request",
+             "detail": f"text exceeds {_DEMO_MAX_CHARS} characters"},
+            status_code=400)
+
+    industry = payload.get("industry", "general") or "general"
+    platform = payload.get("platform", "douyin") or "douyin"
+    if not isinstance(industry, str) or not isinstance(platform, str):
+        return JSONResponse(
+            {"error": "bad_request", "detail": "industry/platform must be strings"},
+            status_code=400)
+
+    started = time.perf_counter()
+    try:
+        detect = pipeline.analyze(text, industry, platform, use_llm=False)
+        rewrite = (None if detect["clean"]
+                   else pipeline.smart_rewrite(
+                       text, industry, platform, use_llm=False))
+    except ValueError as exc:  # 行业/平台不在支持列表
+        return JSONResponse({"error": "bad_request", "detail": str(exc)},
+                            status_code=400)
+    elapsed_ms = round((time.perf_counter() - started) * 1000, 1)
+
+    return JSONResponse({
+        "detect": detect,
+        "rewrite": rewrite,
+        "mode": "rules_only",
+        "version": __version__,
+        "rules_version": rules_store.meta().get("version"),
+        "rule_count": len(rules_store.all_rules()),
+        "elapsed_ms": elapsed_ms,
+    })
+
+
 def build_app(token: "str | list[str] | None" = None,
               key_tenants: "str | dict[str, str] | None" = None,
               meter: "UsageMeter | None" = None,
@@ -190,7 +291,10 @@ def build_app(token: "str | list[str] | None" = None,
     tokens = _parse_tokens(token)
     # 每次构建全新 FastMCP 实例：Streamable HTTP 会话管理器每实例只能启动一次
     app = create_mcp().streamable_http_app()
-    # 健康检查置于 MCP 路由之前（路径不冲突）
+    # 探活与演示页置于 MCP 路由之前（路径不冲突），且不经过 Bearer 鉴权
+    app.router.routes.insert(0, Route(_DEMO_API_PATH, demo_analyze,
+                                      methods=["POST"]))
+    app.router.routes.insert(0, Route(_DEMO_PATH, demo_page, methods=["GET"]))
     app.router.routes.insert(0, Route("/healthz", healthz, methods=["GET"]))
     if tokens:
         if isinstance(key_tenants, dict):

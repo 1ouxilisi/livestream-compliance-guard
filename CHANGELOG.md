@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### 新增
+- **公开演示页 `/demo` + `/demo/analyze`**（v0.9.1）：镜像内置单页前端，浏览器打开即可贴文本、看风险等级／命中词／改写建议，不需要 MCP 客户端；端点固定 `use_llm=False` 走纯规则层，公开被刷不消耗 token。服务端强制 2000 字符上限与每 IP 每分钟 20 次限流，配了 Bearer 后 `/mcp` 仍鉴权而 `/demo` 与 `/healthz` 保持公开。新增 11 个用例覆盖页面可访问、高风险命中、clean 跳过改写、非法输入、限流 429 与配 Key 后演示页仍公开。
 - **规则库 v1.5 · 英文违规词表**：在既有 14 条规则内追加英文同义违规词（绝对化 `number one` / `world-class` / `best in the world`；虚假保真 `guaranteed authentic` / `zero risk` / `risk-free`；升值 `guaranteed to appreciate` / `will only go up`；疗效 `cures cancer` / `miracle cure` / `no side effects`；迷信 `feng shui`；四平台导流 `whatsapp` / `telegram` / `wechat` / `dm me`），**规则条数与替换条数不变**（仍 14 / 16，聚合 20 / 31）。
 - **英文规则层用例**：对抗 a51–a55（英文绝对化 / 保真 / 升值 / 疗效 / 导流）＋ 良性 b38–b40（英文客观卖点 / 化妆品特证 / 蓝帽声明），校验英文可拦且不误报；规则评测 87 → **95 条**（良性 40、对抗 55）。
 - **跨语言红队 / 语义用例扩充**：redteam 增至 r01–r20（补英文注入、角色扮演越狱、冒充权威、指令覆盖、站外导流、花括号插字等），semantic 增至 s01–s14（补英文疗效 / 保值 / 导流 / 弱最高级 / 迷信暗示与化妆品疗效暗示）；离线变体基线由 20 条扩到 **34 条**。

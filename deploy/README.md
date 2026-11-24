@@ -6,6 +6,28 @@
 | **Python（最省事，推荐先跑通）** | Railway / Render / Fly.io，或腾讯云/阿里云轻量服务器 + Docker | 现有 FastMCP 直接搬 | 支持长驻进程与 Docker，按用量付费，国内访问选腾讯云 |
 | **TypeScript（中期，全球边缘）** | Cloudflare Workers | 追求免费额度、全球低延迟、官方 MCP/OAuth 一等支持 | 用 TS 写薄传输层，规则读同一份 `rules/*.json`，核心资产不重写 |
 
+## 公开演示页（v0.9.1 新增，买家可直接打开）
+镜像内已有两个免鉴权路由，专门用来公开演示：
+
+| 路由 | 方法 | 作用 |
+|---|---|---|
+| `/demo` | GET | 单页前端：贴一段话 → 立刻出风险等级、命中词、改写建议 |
+| `/demo/analyze` | POST | 演示用 JSON 端点，`{"text":"...","industry":"general","platform":"douyin"}` |
+
+设计约束（不要在演示里破坏它们）：
+- `/demo/analyze` **固定 rules-only**（`use_llm=False`），公开无限次被刷也不消耗 token；
+  交付版才在其上叠 LLM 语义层。
+- 服务端强制 `2000` 字符上限与每 IP 每分钟 `20` 次限流，前端 `maxlength` 只是提示。
+- 配了 `LCG_BEARER_TOKEN` 后 `/mcp` 照样要鉴权，但 `/demo` 与 `/healthz` 保持公开——
+  演示页必须让没凭据的买家点得开。
+
+本地起：
+```bash
+PYTHONPATH=src python -m uvicorn lcg.server_http:build_app --factory --host 0.0.0.0 --port 8000
+# 浏览器打开 http://127.0.0.1:8000/demo
+```
+公网给买家看时记得：只暴露 `/demo` 与 `/healthz`，`/mcp` 始终开 Key。
+
 ## 远程化进度（v0.2.0 已内置传输与单令牌鉴权）
 - [x] **传输**：`python -m lcg.server_http`（`pip install ".[http]"`）已提供 Streamable HTTP，挂载 `/mcp`，另有免鉴权探活 `/healthz`。
 - [x] **鉴权（单令牌）**：设置 `LCG_BEARER_TOKEN` 即对 `/mcp` 强制 `Authorization: Bearer <token>`（纯 ASGI 中间件，不缓冲、兼容 SSE 流式）；客户端配置见 `examples/mcp-client.http.md`。
