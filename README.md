@@ -36,7 +36,7 @@ python scripts/export_rules.py --check
 
 落一个 JSON 就生效，`industry=skincare` 立即可检测；医疗、金融等强监管行业先走 `_` 前缀底稿 + 法务复核。详见 [docs/ADD-YOUR-LEXICON.md](docs/ADD-YOUR-LEXICON.md)。
 
-<img src="docs/assets/demo-zh.png" width="440 alt="中文界面：输入话术 → 风险等级 → 命中词 → 法规依据 → 改写建议">
+<img src="docs/assets/demo-zh.png" width="440" alt="中文界面：输入话术 → 风险等级 → 命中词 → 法规依据 → 改写建议">
 <img src="docs/assets/demo-en.png" width="440" alt="English UI: same engine, English output">
 
 完整案例（问题 / 方案 / 技术难点 / 结果 / 边界）：[docs/CASE-STUDY.md](docs/CASE-STUDY.md)
