@@ -3,13 +3,15 @@
 > Real-time banned-word / absolute-term / false-claim detection for **live commerce** hosts, AI shopping agents and digital-human sellers — China Advertising Law + major platform rules, with built-in **jadeite** rules plus pluggable **food/health-food** and **cosmetics** lexicons on a shared language-neutral rule core.
 > 直播话术、短视频带货文案、商品标题、客服回复的**实时合规检测**：广告法极限词、虚假宣传、升值承诺、医疗功效、迷信、站外导流；核心包内置**翡翠**行业规则，**食品/保健食品、化妆品**为可插拔插件词库，另含抖音/快手/视频号/淘宝直播平台规则。
 
-[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.9.1-orange)]()
+[![CI](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1ouxilisi/livestream-compliance-guard/actions/workflows/ci.yml) [![MCP](https://img.shields.io/badge/MCP-ready-blue)]() [![license](https://img.shields.io/badge/license-MIT-green)]() [![version](https://img.shields.io/badge/version-v0.10.0-orange)]()
 
 > 仓库地址：`github.com/1ouxilisi/livestream-compliance-guard`；CI 徽章在仓库公开并由 GitHub Actions 跑通后对外显示。
 
 ## 30 秒看懂 / At a glance
 
 **看什么**：一个可被任意 agent（Claude / Cursor / Dify / 数字人后台）调用的 **MCP 合规拦截器**——话术出口前判定风险、给出法规依据和改写建议。
+
+**先看效果**：[静态示例页](https://1ouxilisi.github.io/livestream-compliance-guard/demo/) — 30 条样本，全部由本仓库规则引擎在构建时跑出（是快照，不是实时推理：不会挂、不烧 token，结果可用 `python evals/run_evals.py` 复跑）。
 
 **硬指标**（均可复跑，报告在 `reports/`）：
 
@@ -25,7 +27,16 @@ python scripts/demo_walkthrough.py --offline
 python -m pytest -q
 ```
 
-<img src="docs/assets/demo-zh.png" width="440" alt="中文界面：输入话术 → 风险等级 → 命中词 → 法规依据 → 改写建议">
+**接客户自己的词表**（不用改代码，约 5 分钟）：
+
+```bash
+python scripts/new_plugin.py --industry skincare --name 护肤品 --words "七天美白,永久脱毛@medium"
+python scripts/export_rules.py --check
+```
+
+落一个 JSON 就生效，`industry=skincare` 立即可检测；医疗、金融等强监管行业先走 `_` 前缀底稿 + 法务复核。详见 [docs/ADD-YOUR-LEXICON.md](docs/ADD-YOUR-LEXICON.md)。
+
+<img src="docs/assets/demo-zh.png" width="440 alt="中文界面：输入话术 → 风险等级 → 命中词 → 法规依据 → 改写建议">
 <img src="docs/assets/demo-en.png" width="440" alt="English UI: same engine, English output">
 
 完整案例（问题 / 方案 / 技术难点 / 结果 / 边界）：[docs/CASE-STUDY.md](docs/CASE-STUDY.md)
@@ -97,7 +108,7 @@ MCP 客户端配置（示例）：
 
 ## 商业支持 / Commercial support
 - 开源核心可自由自托管；定制词库、行业插件、私有化部署等承接仅通过 Fiverr / Upwork 等第三方外包平台站内沟通与交易，不在站外私下接洽或转介绍。
-- 相关文档：[English README](README.en.md) · [合规依据对照表](docs/COMPLIANCE_MAPPING.md) · [承接范围与能力边界](docs/SCOPE_BOUNDARY.md) · [部署与平台化演进](docs/DEPLOYMENT.md) · [MCP 分发与上架说明](docs/MCP_MARKETPLACE.md) · [Gig 文案草稿](docs/GIG_LISTING.md) · [演示录屏脚本](docs/DEMO_SCRIPT.md) · [成品样例](samples/README.md)
+- 相关文档：[English README](README.en.md) · [合规依据对照表](docs/COMPLIANCE_MAPPING.md) · [承接范围与能力边界](docs/SCOPE_BOUNDARY.md) · [部署与平台化演进](docs/DEPLOYMENT.md) · [MCP 分发与上架说明](docs/MCP_MARKETPLACE.md) · [Gig 文案草稿](docs/GIG_LISTING.md) · [演示录屏脚本](docs/DEMO_SCRIPT.md) · [成品样例](samples/README.md) · [接入自有词表](docs/ADD-YOUR-LEXICON.md) · [静态示例页](https://1ouxilisi.github.io/livestream-compliance-guard/demo/)
 
 ## Roadmap
 - [x] LLM 层真实联调：谐音/暗示召回 ＋ 注入/越狱/冒充权威/指令覆盖抗性 ＋ 整句合规改写（在线快照 73/73，最新结果见 `reports/LLM_EVAL.md`）；双模型交叉评测见 `reports/MODEL_CROSSCHECK.md`。规则词表自 v1.5 起在既有规则内追加英文同义违规词（不新增规则条数）；英文/跨语言广度词表仍待逐条对齐法规扩充，DeepTeam/PyRIT 自动广度扫描仍在 P1（promptfoo 固定断言与生成式红队配置已接入，见 `reports/PROMPTFOO.md`）。

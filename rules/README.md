@@ -36,7 +36,7 @@
 |---|---|
 | `package` | 包名，与文件名、`industry` 一致 |
 | `format` | 固定 `lcg-plugin/1` |
-| `industry` | 行业键，必须已存在于 `models.INDUSTRIES` |
+| `industry` | 行业键；包被加载后自动成为可选行业（`models.registered_industries()` 聚合），无需再改代码注册 |
 | `version` | 本包版本，独立于核心包与软件包 |
 | `sources[]` | 每项 `{law, article, url}`，列出本包法条来源；`url` 统一挂国家法律法规数据库入口 `https://flk.npc.gov.cn`，不编造深链 |
 
@@ -55,7 +55,7 @@
 
 1. 用法律检索工具逐条核实法条条款号与原文（**禁止凭记忆编造条款号或深链**），`url` 统一挂 `https://flk.npc.gov.cn` 入口。
 2. 新建 `plugins/<industry>.json`（`meta` ＋ 增量 `rules` ＋ `replacements`），规则 `scope` 全部用 `industry:<industry>`。
-3. 在 `src/lcg/models.py` 的 `INDUSTRIES` 增加该行业键。
+3. **无需注册代码**：文件以 `<industry>.json` 落盘（不要下划线前缀），进程重启后即被加载，`detect(industry=<industry>)` 直接可用；也可用 `scripts/new_plugin.py` 从词表直接生成。
 4. 在 `evals/cases/benign.jsonl`、`adversarial.jsonl` 增加该行业正反向用例（每条标 `industry`），并在 `tests/test_plugins.py` 增加正反向测试；**良性合规话术必须 clean**。
 5. 依次跑 `python scripts/export_rules.py`（规范化）→ `--check`（守门）→ `pytest` → `evals/run_evals.py`，全绿后再同步主工程。
 

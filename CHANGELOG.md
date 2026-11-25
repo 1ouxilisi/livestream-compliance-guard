@@ -6,6 +6,20 @@
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-25
+
+### 新增
+- **行业词表一键接入** `scripts/new_plugin.py`：把「词A,词B@medium」直接生成结构合法的 `rules/plugins/<industry>.json`，写完立刻做 `validate_plugin` + 聚合自检 + 探针命中验证；支持 `--dry-run` / `--force` / `--list`。配套 `docs/ADD-YOUR-LEXICON.md`（3 条命令、字段分工、4 个必踩的坑、强监管行业 placeholder 流程、交付口径）。
+- **静态快照示例页** `scripts/build_static_demo.py` → `docs/demo/index.html`：构建时用真实规则引擎跑 `evals/cases/*.jsonl` 抽出的 30 条样本（clean 11 / low 4 / medium 1 / high 14，改写后复检干净 17/19），单文件、无外链、可被 GitHub Pages 直接托管；页面只做本地筛选，不发请求、不耗 token。
+
+### 变更
+- **行业白名单由硬编码改为动态聚合**：`models.INDUSTRIES` 保留为内置四类，新增 `models.registered_industries()`＝内置＋已加载插件包的 `meta.industry`（`lru_cache` 缓存一次，`new_plugin.py` 写完自动清缓存）；`validate_context` 改为按该集合校验，并对行业键做 strip/lower 归一化。
+- **MCP 工具签名放开**：`server_stdio` 六个工具的 `industry` 由 `Literal["jadeite","general","food","cosmetics"]` 改为 `str`，未知行业在入参校验阶段报错并列出当前可选值；插件包新增行业不再需要改代码 + 重新打包。
+- 文档同步：`CONTRIBUTING.md` 与 `rules/README.md` 的「新增行业」步骤改为「落 JSON / 用 new_plugin.py，无需注册代码」。
+
+### 回归
+- `pytest` **232 项**全绿；`export_rules.py --check` 绿；新增行业 `selftest` 端到端验证通过（写包 → 聚合 22 规则/33 替换 → 探针 high → 删除后复原 20/31）。
+
 ## [0.9.1] - 2026-11-24
 
 ### 新增

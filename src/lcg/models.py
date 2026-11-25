@@ -16,8 +16,32 @@ lcg.models —— 枚举常量、入参校验与「等长」输入归一化（�
 """
 from __future__ import annotations
 
+from functools import lru_cache
+
 INDUSTRIES = ("jadeite", "general", "food", "cosmetics")
 PLATFORMS = ("douyin", "kuaishou", "shipinhao", "taobao")
+@lru_cache(maxsize=1)
+def registered_industries() -> tuple:
+    """内置行业 + 已加载插件包的行业键。
+
+    插件包（rules/plugins/<industry>.json）一旦被 rules_store 加载，其 meta.industry
+    就自动成为可用行业，不需要再改本文件的 INDUSTRIES 常量。结果缓存一次，运行期
+    新增/删除插件后需重启进程或调用 registered_industries.cache_clear()。
+    规则库不可用（例如只调用归一化函数）时退回内置枚举。
+    """
+    names = list(INDUSTRIES)
+    try:
+        from . import rules_store
+
+        for pkg in rules_store.meta().get("packages", []):
+            key = pkg.get("industry")
+            if key and key not in names:
+                names.append(key)
+    except Exception:  # 规则文件缺失或损坏不应阻断入参校验
+        pass
+    return tuple(names)
+
+
 RISK_LEVELS = ("clean", "low", "medium", "high")
 SEV_ORDER = {"clean": 0, "low": 1, "medium": 2, "high": 3}
 
@@ -50,14 +74,19 @@ _T2S = {
 
 
 def validate_context(industry: str, platform: str) -> tuple:
-    """校验行业/平台取值；非法值抛 ValueError（MCP 层会转成工具调用错误）。"""
-    if industry not in INDUSTRIES:
+    """校验行业/平台取值；非法值抛 ValueError（MCP 层会转成工具调用错误）。
+
+    industry 的可选集合 = 内置四类 + 当前已加载插件包的行业键（见 registered_industries）。
+    """
+    key = str(industry).strip().lower()
+    allowed = registered_industries()
+    if key not in allowed:
         raise ValueError(
-            f"不支持的 industry={industry!r}，可选：{', '.join(INDUSTRIES)}")
+            f"不支持的 industry={industry!r}，可选：{', '.join(allowed)}")
     if platform not in PLATFORMS:
         raise ValueError(
             f"不支持的 platform={platform!r}，可选：{', '.join(PLATFORMS)}")
-    return industry, platform
+    return key, platform
 
 
 def _map_char(ch: str) -> str:

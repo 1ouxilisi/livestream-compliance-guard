@@ -13,6 +13,10 @@ lcg.server_stdio —— MCP stdio 传输服务器。
 工具注册集中在 create_mcp() 工厂：stdio 使用模块级单例 mcp，远程 HTTP 入口
 每次构建新实例（FastMCP 的 Streamable HTTP 会话管理器每个实例只能启动一次）。
 
+行业键：内置 jadeite/general/food/cosmetics，外加 rules/plugins/*.json 里声明的任意
+industry（scripts/new_plugin.py 生成即生效，无需改代码）。传未知行业会在入参校验阶段
+报错并列出当前可选值。
+
 运行（在项目根目录）：
     python server.py            # 对外兼容入口
     python -m lcg.server_stdio  # 模块直跑
@@ -43,17 +47,20 @@ def create_mcp() -> FastMCP:
     @mcp.tool()
     def scan_text(
         text: str,
-        industry: Literal["jadeite", "general", "food", "cosmetics"] = "jadeite",
+        industry: str = "jadeite",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
-        """扫描单条直播/短视频文本，返回风险等级、命中明细与处置建议。"""
+        """扫描单条直播/短视频文本，返回风险等级、命中明细与处置建议。
+
+        industry 可为内置四类（jadeite/general/food/cosmetics），也可为自建插件包的行业键。
+        """
         _guard("scan_text")
         return engine.detect(text, industry=industry, platform=platform)
 
     @mcp.tool()
     def scan_livestream(
         transcript: List[Dict[str, str]],
-        industry: Literal["jadeite", "general", "food", "cosmetics"] = "jadeite",
+        industry: str = "jadeite",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
         """扫描整场直播逐句文本。transcript 为 [{seq, speaker, text}, ...]。"""
@@ -62,17 +69,20 @@ def create_mcp() -> FastMCP:
 
     @mcp.tool()
     def compliance_rules(
-        industry: Literal["jadeite", "general", "food", "cosmetics"] = "jadeite",
+        industry: str = "jadeite",
         platform: Optional[Literal["douyin", "kuaishou", "shipinhao", "taobao"]] = None,
     ) -> Dict[str, Any]:
-        """返回当前生效的合规规则与规则库版本，供客户端展示/同步。"""
+        """返回当前生效的合规规则与规则库版本，供客户端展示/同步。
+
+        industry 支持内置四类与任意已加载插件包行业键。
+        """
         _guard("compliance_rules")
         return engine.get_rules(industry=industry, platform=platform)
 
     @mcp.tool()
     def safe_rewrite(
         text: str,
-        industry: Literal["jadeite", "general", "food", "cosmetics"] = "jadeite",
+        industry: str = "jadeite",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
     ) -> Dict[str, Any]:
         """对命中词给出替换建议、改写全文并复检风险；正式话术请人工复核。"""
@@ -82,7 +92,7 @@ def create_mcp() -> FastMCP:
     @mcp.tool()
     def scan_smart(
         text: str,
-        industry: Literal["jadeite", "general", "food", "cosmetics"] = "general",
+        industry: str = "general",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
         use_llm: bool = True,
     ) -> Dict[str, Any]:
@@ -97,7 +107,7 @@ def create_mcp() -> FastMCP:
     @mcp.tool()
     def rewrite_smart(
         text: str,
-        industry: Literal["jadeite", "general", "food", "cosmetics"] = "general",
+        industry: str = "general",
         platform: Literal["douyin", "kuaishou", "shipinhao", "taobao"] = "douyin",
         use_llm: bool = True,
     ) -> Dict[str, Any]:

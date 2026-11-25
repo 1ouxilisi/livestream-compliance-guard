@@ -42,7 +42,7 @@ python server.py --selftest             # 端到端自测
 1. 复制 `rules/plugins/_template.json` 为 `rules/plugins/<industry>.json`（下划线前缀文件是模板，不被加载）；
 2. 把 `meta.package` / `meta.industry` 与每条规则的 `scope` 改为 `industry:<industry>`；
 3. 词条与正则须有可溯源法条/平台规则（写入 `meta.sources` 与 `law`）；医疗、金融、教培、酒水等强监管行业上线前须经法务复核；
-4. 在 `src/lcg/models.py` 的 `INDUSTRIES` 注册新行业，并同步 `src/lcg/server_stdio.py` 各工具签名的 `industry` Literal；
+4. **无需改代码**：插件包被 `rules_store` 加载后，`meta.industry` 自动进入可选行业（`models.registered_industries()` 聚合）；MCP 工具的 `industry` 参数已放开为字符串，运行时按当前已加载行业校验。嫌手写 JSON 麻烦可直接用 `python scripts/new_plugin.py --industry <key> --name <中文名> --words "词A,词B@medium"`；
 5. 运行 `python scripts/export_rules.py` 规范化写回；在 `evals/cases/` 补该行业的命中用例与良性防误报用例；
 6. 跑完全部本地验证再提交。
 
