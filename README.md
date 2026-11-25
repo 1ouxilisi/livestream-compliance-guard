@@ -11,7 +11,7 @@
 
 **看什么**：一个可被任意 agent（Claude / Cursor / Dify / 数字人后台）调用的 **MCP 合规拦截器**——话术出口前判定风险、给出法规依据和改写建议。
 
-**先看效果**：[静态示例页](https://1ouxilisi.github.io/livestream-compliance-guard/demo/) — 30 条样本，全部由本仓库规则引擎在构建时跑出（是快照，不是实时推理：不会挂、不烧 token，结果可用 `python evals/run_evals.py` 复跑）。
+**先看效果**：[静态示例页](docs/demo/index.html) — 30 条样本，全部由本仓库规则引擎在构建时跑出（单文件，下载即开；GitHub Pages 开启 `main` + `/docs` 后可直接访问 `https://1ouxilisi.github.io/livestream-compliance-guard/demo/`。是快照，不是实时推理：不会挂、不烧 token，结果可用 `python evals/run_evals.py` 复跑）。
 
 **硬指标**（均可复跑，报告在 `reports/`）：
 
@@ -108,7 +108,7 @@ MCP 客户端配置（示例）：
 
 ## 商业支持 / Commercial support
 - 开源核心可自由自托管；定制词库、行业插件、私有化部署等承接仅通过 Fiverr / Upwork 等第三方外包平台站内沟通与交易，不在站外私下接洽或转介绍。
-- 相关文档：[English README](README.en.md) · [合规依据对照表](docs/COMPLIANCE_MAPPING.md) · [承接范围与能力边界](docs/SCOPE_BOUNDARY.md) · [部署与平台化演进](docs/DEPLOYMENT.md) · [MCP 分发与上架说明](docs/MCP_MARKETPLACE.md) · [Gig 文案草稿](docs/GIG_LISTING.md) · [演示录屏脚本](docs/DEMO_SCRIPT.md) · [成品样例](samples/README.md) · [接入自有词表](docs/ADD-YOUR-LEXICON.md) · [静态示例页](https://1ouxilisi.github.io/livestream-compliance-guard/demo/)
+- 相关文档：[English README](README.en.md) · [合规依据对照表](docs/COMPLIANCE_MAPPING.md) · [承接范围与能力边界](docs/SCOPE_BOUNDARY.md) · [部署与平台化演进](docs/DEPLOYMENT.md) · [MCP 分发与上架说明](docs/MCP_MARKETPLACE.md) · [Gig 文案草稿](docs/GIG_LISTING.md) · [演示录屏脚本](docs/DEMO_SCRIPT.md) · [成品样例](samples/README.md) · [接入自有词表](docs/ADD-YOUR-LEXICON.md) · [静态示例页](docs/demo/index.html)
 
 ## Roadmap
 - [x] LLM 层真实联调：谐音/暗示召回 ＋ 注入/越狱/冒充权威/指令覆盖抗性 ＋ 整句合规改写（在线快照 73/73，最新结果见 `reports/LLM_EVAL.md`）；双模型交叉评测见 `reports/MODEL_CROSSCHECK.md`。规则词表自 v1.5 起在既有规则内追加英文同义违规词（不新增规则条数）；英文/跨语言广度词表仍待逐条对齐法规扩充，DeepTeam/PyRIT 自动广度扫描仍在 P1（promptfoo 固定断言与生成式红队配置已接入，见 `reports/PROMPTFOO.md`）。
