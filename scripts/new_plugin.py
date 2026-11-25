@@ -131,7 +131,8 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--list", action="store_true", help="列出已加载 / 未加载的插件包后退出")
-    parser.add_argument("--industry", help="行业标识：小写英文 2-24 位，如 skincare / medical_device")
+    parser.add_argument(
+        "--industry", help="行业标识：小写英文 2-24 位，如 skincare / medical_device")
     parser.add_argument("--name", help="行业中文名，如 护肤品；用于默认 category 与 note")
     parser.add_argument("--words", help="逗号分隔词表，词后可加 @low/@medium/@high，默认 high")
     parser.add_argument("--category", help="风险类别，默认「<name>-未举证功效宣称」")
