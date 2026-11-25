@@ -7,6 +7,29 @@
 
 > 仓库地址：`github.com/1ouxilisi/livestream-compliance-guard`；CI 徽章在仓库公开并由 GitHub Actions 跑通后对外显示。
 
+## 30 秒看懂 / At a glance
+
+**看什么**：一个可被任意 agent（Claude / Cursor / Dify / 数字人后台）调用的 **MCP 合规拦截器**——话术出口前判定风险、给出法规依据和改写建议。
+
+**硬指标**（均可复跑，报告在 `reports/`）：
+
+- `pytest` **232** 项全绿；规则层评测 **95 条**（良性 40 / 对抗 55）：高危检出 **100%**、干净话术 **误报 0**。
+- 规则层单句 **P50 3.25 ms / P95 9.89 ms**，**145 句/秒**（本机测量，非生产 SLA）。
+- LLM 语义层在线 **73/73**（主力 Qwen3-14B；双模型交叉 34 条：34/34 与 33/34）。
+
+**三行跑起来**（零第三方依赖，不耗模型额度）：
+
+```bash
+python server.py --selftest
+python scripts/demo_walkthrough.py --offline
+python -m pytest -q
+```
+
+<img src="docs/assets/demo-zh.png" width="440" alt="中文界面：输入话术 → 风险等级 → 命中词 → 法规依据 → 改写建议">
+<img src="docs/assets/demo-en.png" width="440" alt="English UI: same engine, English output">
+
+完整案例（问题 / 方案 / 技术难点 / 结果 / 边界）：[docs/CASE-STUDY.md](docs/CASE-STUDY.md)
+
 ## Why（解决什么痛）
 直播带货因一句“最/第一/保真/升值/加微信/养生辟邪”就可能被**警告、断播、扣分、罚款、清退**；数字人/AI 主播 7×24 小时说话，风险更高。本工具把合规检查做成一个可被任意 agent（Claude / Cursor / Dify / 数字人后台）调用的 **MCP 工具**，在话出口/内容发布**之前**拦截并给出改写建议。
 
