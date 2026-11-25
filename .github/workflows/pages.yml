@@ -26,24 +26,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 用 workflow 自带的 GITHUB_TOKEN 启用 Pages（build_type=workflow），
-      # 免去在设置页点 Save；已启用时返回 409，忽略即可。
-      - name: Ensure Pages is enabled
+      # Pages 站点必须由有 admin 权限的凭据创建一次（网页 Settings > Pages，
+      # 或带 repo scope 的 PAT）。GITHUB_TOKEN 调 POST /pages 会返回
+      # 403 Resource not accessible by integration，所以这里只检查、不创建。
+      - name: Check whether a Pages site exists
+        id: pages_check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          code=$(curl -sS -o /tmp/pages.json -w "%{http_code}" -X POST \
+          code=$(curl -sS -o /tmp/pages.json -w "%{http_code}" \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/pages" \
-            -d '{"build_type":"workflow"}' || echo 000)
-          echo "POST /pages -> $code"
+            "https://api.github.com/repos/${{ github.repository }}/pages" || echo 000)
+          echo "GET /pages -> $code"
           cat /tmp/pages.json || true
-          test "$code" = "201" -o "$code" = "409" -o "$code" = "400"
+          if [ "$code" = "200" ]; then
+            echo "exists=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=0" >> "$GITHUB_OUTPUT"
+            echo "::notice::Pages 站点尚未创建：需在 Settings > Pages 点一次 Save（main /docs），之后本 workflow 会自动接管部署。"
+          fi
 
       - uses: actions/configure-pages@v5
+        if: steps.pages_check.outputs.exists == '1'
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pages_check.outputs.exists == '1'
         with:
           path: docs
       - id: deploy
+        if: steps.pages_check.outputs.exists == '1'
         uses: actions/deploy-pages@v4
